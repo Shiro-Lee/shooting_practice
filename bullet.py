@@ -3,6 +3,7 @@ from pygame.sprite import Sprite
 
 
 class Bullet(Sprite):
+    """子弹类"""
 
     def __init__(self, settings, screen, gun):
         super().__init__()

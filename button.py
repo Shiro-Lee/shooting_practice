@@ -2,6 +2,7 @@ import pygame.font
 
 
 class Button:
+    """按钮类"""
 
     def __init__(self, screen, text_box, msg):
         """初始化按钮的属性"""

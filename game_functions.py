@@ -4,6 +4,7 @@ from bullet import Bullet
 from target import UniformTarget, AccelerateTarget
 from notice_bar import NoticeBar
 from target_list import target_list as tl
+from music_and_sound import *
 
 
 def check_events(settings, screen, stats, infos, gun, targets, bullets, timer, textbox, play_button, notice_bars):
@@ -76,6 +77,8 @@ def start_game(settings, screen, stats, infos, gun, targets, bullets, notice_bar
     infos.prep_timer()
     # 清空子弹列表
     bullets.empty()
+    # 播放背景音乐
+    pygame.mixer.music.play(-1)
     # 创建第一轮靶机
     create_targets(settings, screen, stats, targets, tl)
     # 靶机移动提示
@@ -96,6 +99,7 @@ def fire_bullet(settings, screen, stats, infos, gun, bullets):
     """如果还没有达到限制，就发射一颗子弹"""
     # 创建新子弹，并将其加入到编组bullets中
     if len(bullets) < settings.bullets_allowed:
+        fire_sound.play()
         stats.bullet_left -= 1
         infos.prep_bullets()
         new_bullet = Bullet(settings, screen, gun)
@@ -104,9 +108,7 @@ def fire_bullet(settings, screen, stats, infos, gun, bullets):
 
 def update_bullets(settings, screen, stats, gun, targets, bullets, notice_bars):
     """更新子弹位置，并删除已消失的子弹"""
-    # 更新子弹的位置
     bullets.update()
-    # 删除已消失的子弹
     for bullet in bullets.copy():
         if bullet.rect.left >= screen.get_rect().right:
             bullets.remove(bullet)
@@ -122,20 +124,20 @@ def update_targets(targets):
 def update_notice(notice_bars):
     """更新提示条"""
     for notice_bar in notice_bars.sprites():
-        if notice_bar.timer.pass_time > 1:
+        if notice_bar.timer.pass_time > 1:  # 提示条出现1秒后消失
             notice_bar.timer.stop()
             notice_bars.remove(notice_bar)
     notice_bars.update()
 
 
 def check_bullet_target_collisions(settings, screen, stats, gun, targets, bullets, notice_bars):
-    """相应子弹和靶机的碰撞"""
+    """响应子弹和靶机的碰撞"""
     collisions = pygame.sprite.groupcollide(bullets, targets, False, True)
     target_life = 0
     if collisions:
-        for target in targets.sprites():
+        for target in targets.sprites():    # 统计总的靶机生命值
             target_life += target.life
-        if target_life == 0 and stats.round != settings.max_round:
+        if target_life == 0 and stats.round != settings.max_round:  # 该轮靶机全部击破，进入下一轮
             stats.round += 1
             create_targets(settings, screen, stats, targets, tl)
             prep_new_round(settings, screen, targets, notice_bars)
@@ -143,14 +145,12 @@ def check_bullet_target_collisions(settings, screen, stats, gun, targets, bullet
 
 def create_targets(settings, screen, stats, targets, target_list=tl):
     """创建靶机"""
-    stats.target_num = 0
     for target_attribute in target_list[stats.round-1]:
-        if target_attribute[1]:
+        if target_attribute[1]:     # target_attribute[1]为True，创建变速靶
             target = AccelerateTarget(settings, screen, *target_attribute)
-        else:
+        else:   # 否则创建匀速靶
             target = UniformTarget(settings, screen, *target_attribute)
-        stats.target_num += 2 if target_attribute[3] else 1
-        if target.args[3]:
+        if target.args[3]:  # target_attribute[3]为True，靶机带盾
             target.shield_timer.begin()
         target.timer.begin()
         targets.add(target)

@@ -4,6 +4,7 @@ from my_timer import MyTimer
 
 
 class NoticeBar(Sprite):
+    """靶机启动提示条"""
 
     def __init__(self, settings, screen, target):
         super().__init__()
@@ -18,7 +19,7 @@ class NoticeBar(Sprite):
     def update(self):
         """向下移动提示条"""
         if self.speed != 0:
-            if self.y >= self.screen.get_rect().bottom - self.settings.y_target_boundary:
+            if self.y >= self.screen.get_rect().bottom - self.settings.y_target_boundary:   # 到达底端时停止移动
                 self.speed = 0
             else:
                 self.y += self.speed

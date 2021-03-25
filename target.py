@@ -1,6 +1,7 @@
 import pygame
 from pygame.sprite import Sprite
 from my_timer import MyTimer
+from music_and_sound import target_broken_sound, shield_broken_sound
 
 
 class TargetSample:
@@ -37,15 +38,15 @@ class Target(TargetSample, Sprite):
         self.shield_timer = MyTimer()
         self.moving = False
 
-        self.delay = self.args[4]
-        if self.args[3]:
+        self.delay = self.args[4]   # 靶机延时启动时长
+        if self.args[3]:    # 带盾
             self.image = pygame.image.load('images/target_shield.png')
             self.life = 2
-        else:
+        else:   # 无盾
             self.life = 1
 
     def update_shield(self):
-        if self.args[3] and self.shield_timer.pass_time > 8:
+        if self.args[3] and self.shield_timer.pass_time > 5:    # 带盾靶机每5秒会重新生成护盾
             self.shield_timer.reset()
             if self.life < 2:
                 self.image = pygame.image.load('images/target_shield.png')
@@ -64,12 +65,15 @@ class Target(TargetSample, Sprite):
         self.screen.blit(self.image, self.rect)
 
     def kill(self):
+        """重写kill()，响应靶机被击中"""
         if self.timer.pass_time > 0.5:  # 0.5秒内的碰撞视为射中同一个靶机
-            if self.life > 1:
+            if self.life > 1:   # 击破护盾
+                shield_broken_sound.play()
                 self.life -= 1
                 self.image = pygame.image.load('images/target.png')
                 self.timer.reset()
-            else:
+            else:   # 击破靶机
+                target_broken_sound.play()
                 self.timer.stop()
                 self.shield_timer.stop()
                 super().kill()

@@ -2,10 +2,12 @@ import pygame
 
 
 class TextBox:
+    """玩家名输入框"""
 
     def __init__(self, screen, stats, start_game=None, *args):
         self.width, self.height = 300, 50
         self.text = ''
+        self.notice_text = 'Input your name:'
         self.font = pygame.font.SysFont('arial', 32)
         self.text_color = (0, 0, 0)
         self.bg_color = (255, 255, 255)
@@ -13,6 +15,7 @@ class TextBox:
         self.stats = stats
         self.screen_rect = screen.get_rect()
         self.text_image, self.text_rect = None, None
+        self.notice_text_image, self.notice_text_rect = None, None
         self.box_rect = None
         self.start_game = start_game
         self.length = 0
@@ -23,6 +26,13 @@ class TextBox:
         self.box_rect = pygame.Rect(0, 0, self.width, self.height)
         self.box_rect.center = self.screen_rect.center
         self.prep_text()
+        self.prep_notice_text()
+
+    def prep_notice_text(self):
+        self.notice_text_image = self.font.render(self.notice_text, True, self.text_color, None)
+        self.notice_text_rect = self.notice_text_image.get_rect()
+        self.notice_text_rect.centerx = self.box_rect.centerx
+        self.notice_text_rect.bottom = self.text_rect.top - 15
 
     def prep_text(self):
         self.text_image = self.font.render(self.text, True, self.text_color, self.bg_color)
@@ -30,6 +40,7 @@ class TextBox:
         self.text_rect.center = self.box_rect.center
 
     def draw_textbox(self):
+        self.screen.blit(self.notice_text_image, self.notice_text_rect)
         self.screen.fill(self.bg_color, self.box_rect)
         self.screen.blit(self.text_image, self.text_rect)
 
