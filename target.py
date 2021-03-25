@@ -66,7 +66,7 @@ class Target(TargetSample, Sprite):
 
     def kill(self):
         """重写kill()，响应靶机被击中"""
-        if self.timer.pass_time > 0.5:  # 0.5秒内的碰撞视为射中同一个靶机
+        if self.timer.pass_time > 0.5:  # 0.5秒内的碰撞视为击中同一个靶机
             if self.life > 1:   # 击破护盾
                 shield_broken_sound.play()
                 self.life -= 1
@@ -77,6 +77,24 @@ class Target(TargetSample, Sprite):
                 self.timer.stop()
                 self.shield_timer.stop()
                 super().kill()
+
+    def start_timer(self):
+        self.timer.begin()
+
+    def stop_timer(self):
+        self.timer.stop()
+
+    def reset_timer(self):
+        self.timer.reset()
+
+    def start_shield_timer(self):
+        self.shield_timer.begin()
+
+    def stop_shield_timer(self):
+        self.shield_timer.stop()
+
+    def reset_shield_timer(self):
+        self.shield_timer.reset()
 
 
 class UniformTarget(Target):
@@ -100,7 +118,6 @@ class UniformTarget(Target):
 
 class AccelerateTarget(Target):
     """变加速靶"""
-
     def __init__(self, settings, screen, *args):
         super().__init__(settings, screen, *args)
         self.speed = 0

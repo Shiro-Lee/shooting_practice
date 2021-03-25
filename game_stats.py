@@ -19,3 +19,9 @@ class GameStats:
 
     def start_timer(self):
         self.timer.begin()
+
+    def reset_timer(self):
+        self.timer.reset()
+
+    def stop_timer(self):
+        self.timer.stop()

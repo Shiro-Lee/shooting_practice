@@ -8,7 +8,8 @@ class TextBox:
         self.width, self.height = 300, 50
         self.text = ''
         self.notice_text = 'Input your name:'
-        self.font = pygame.font.SysFont('arial', 32)
+        self.text_font = pygame.font.SysFont('arial', 32)
+        self.notice_text_font = pygame.font.SysFont('arial', 24)
         self.text_color = (0, 0, 0)
         self.bg_color = (255, 255, 255)
         self.screen = screen
@@ -29,13 +30,13 @@ class TextBox:
         self.prep_notice_text()
 
     def prep_notice_text(self):
-        self.notice_text_image = self.font.render(self.notice_text, True, self.text_color, None)
+        self.notice_text_image = self.notice_text_font.render(self.notice_text, True, self.text_color, None)
         self.notice_text_rect = self.notice_text_image.get_rect()
         self.notice_text_rect.centerx = self.box_rect.centerx
         self.notice_text_rect.bottom = self.text_rect.top - 15
 
     def prep_text(self):
-        self.text_image = self.font.render(self.text, True, self.text_color, self.bg_color)
+        self.text_image = self.text_font.render(self.text, True, self.text_color, self.bg_color)
         self.text_rect = self.text_image.get_rect()
         self.text_rect.center = self.box_rect.center
 

@@ -28,3 +28,12 @@ class NoticeBar(Sprite):
     def draw_bar(self):
         """绘制提示条"""
         pygame.draw.rect(self.screen, self.color, self.rect)
+
+    def start_timer(self):
+        self.timer.begin()
+
+    def stop_timer(self):
+        self.timer.stop()
+
+    def reset_timer(self):
+        self.timer.reset()

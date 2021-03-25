@@ -62,10 +62,10 @@ def stop_timers(overall_timer, targets, notice_bars):
     """停止所有计时器"""
     overall_timer.stop()
     for target in targets.sprites():
-        target.timer.stop()
-        target.shield_timer.stop()
+        target.stop_timer()
+        target.stop_shield_timer()
     for notice_bar in notice_bars.sprites():
-        notice_bar.timer.stop()
+        notice_bar.stop_timer()
 
 
 def start_game(settings, screen, stats, infos, gun, targets, bullets, notice_bars):
@@ -91,7 +91,7 @@ def prep_new_round(settings, screen, targets, notice_bars):
     """靶机移动提示条"""
     for target in targets.sprites():
         notice_bar = NoticeBar(settings, screen, target)
-        notice_bar.timer.begin()
+        notice_bar.start_timer()
         notice_bars.add(notice_bar)
 
 
@@ -125,7 +125,7 @@ def update_notice(notice_bars):
     """更新提示条"""
     for notice_bar in notice_bars.sprites():
         if notice_bar.timer.pass_time > 1:  # 提示条出现1秒后消失
-            notice_bar.timer.stop()
+            notice_bar.stop_timer()
             notice_bars.remove(notice_bar)
     notice_bars.update()
 
@@ -137,10 +137,14 @@ def check_bullet_target_collisions(settings, screen, stats, gun, targets, bullet
     if collisions:
         for target in targets.sprites():    # 统计总的靶机生命值
             target_life += target.life
-        if target_life == 0 and stats.round != settings.max_round:  # 该轮靶机全部击破，进入下一轮
-            stats.round += 1
-            create_targets(settings, screen, stats, targets, tl)
-            prep_new_round(settings, screen, targets, notice_bars)
+        if target_life == 0:  # 该轮靶机全部击破，进入下一轮
+            if stats.round == settings.max_round:
+                stats.stop_timer()
+                show_result(stats)
+            else:
+                stats.round += 1
+                create_targets(settings, screen, stats, targets, tl)
+                prep_new_round(settings, screen, targets, notice_bars)
 
 
 def create_targets(settings, screen, stats, targets, target_list=tl):
@@ -151,8 +155,8 @@ def create_targets(settings, screen, stats, targets, target_list=tl):
         else:   # 否则创建匀速靶
             target = UniformTarget(settings, screen, *target_attribute)
         if target.args[3]:  # target_attribute[3]为True，靶机带盾
-            target.shield_timer.begin()
-        target.timer.begin()
+            target.start_shield_timer()
+        target.start_timer()
         targets.add(target)
 
 
@@ -170,6 +174,10 @@ def check_target_edges(targets):
     for target in targets.sprites():
         if target.check_edges():
             target.direction *= -1
+
+
+def show_result(stats):
+    print(round(stats.timer.pass_time, 2), stats.bullet_left)
 
 
 def update_screen(settings, screen, stats, infos, gun, target_sample, targets, bullets, notice_bars, text_box, play_button, timer):
