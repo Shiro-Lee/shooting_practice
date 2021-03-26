@@ -32,7 +32,7 @@ def run_game():
 
     # 创建用于存储游戏统计信息的实例，并创建信息显示板
     stats = GameStats(settings, timer)
-    infos = InfoBoard(settings, screen, stats, timer)
+    infos = InfoBoard(settings, screen, stats)
 
     # 创建靶机编组、提示条编组
     target_sample = TargetSample()
@@ -46,13 +46,13 @@ def run_game():
     # 开始游戏主循环
     while True:
 
-        func.check_events(settings, screen, stats, infos, gun, targets, bullets, timer, text_box, play_button, notice_bars)
+        func.check_events(settings, screen, stats, infos, gun, targets, bullets, text_box, play_button, notice_bars)
         if stats.game_active:
             gun.update()
-            func.update_bullets(settings, screen, stats, gun, targets, bullets, notice_bars)
+            func.update_bullets(settings, screen, stats, infos, gun, targets, bullets, notice_bars)
             func.update_notice(notice_bars)
             func.update_targets(targets)
-        func.update_screen(settings, screen, stats, infos, gun, target_sample, targets, bullets, notice_bars, text_box, play_button, timer)
+        func.update_screen(settings, screen, stats, infos, gun, target_sample, targets, bullets, notice_bars, text_box, play_button)
 
 
 run_game()

@@ -4,13 +4,13 @@ import pygame.font
 class InfoBoard:
     """显示时间、剩余弹药等文本信息的类"""
 
-    def __init__(self, settings, screen, stats, timer):
+    def __init__(self, settings, screen, stats):
         """初始化时间、弹药属性"""
         self.screen = screen
         self.screen_rect = screen.get_rect()
         self.settings = settings
         self.stats = stats
-        self.timer = timer
+        self.timer = stats.timer
 
         self.bullet_image = pygame.image.load('images/bullet.png')
         self.bullet_rect = self.bullet_image.get_rect()
@@ -49,3 +49,6 @@ class InfoBoard:
         self.screen.blit(self.bullet_image, self.bullet_rect)
         self.screen.blit(self.bullet_left_image, self.bullet_left_rect)
         self.screen.blit(self.timer_image, self.timer_rect)
+
+    def new_timer(self):
+        self.timer = self.stats.timer

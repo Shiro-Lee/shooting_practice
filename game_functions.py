@@ -1,4 +1,3 @@
-import pygame
 import sys
 from bullet import Bullet
 from target import UniformTarget, AccelerateTarget
@@ -7,14 +6,14 @@ from target_list import target_list as tl
 from music_and_sound import *
 
 
-def check_events(settings, screen, stats, infos, gun, targets, bullets, timer, textbox, play_button, notice_bars):
+def check_events(settings, screen, stats, infos, gun, targets, bullets, textbox, play_button, notice_bars):
     """处理事件"""
     for event in pygame.event.get():
         if event.type == pygame.QUIT:   # 关闭窗口时退出游戏
-            stop_timers(timer, targets, notice_bars)
+            stop_timers(stats, targets, notice_bars)
             sys.exit()
         elif event.type == pygame.KEYDOWN:  # 按下按键
-            check_keydown_events(event, settings, screen, stats, infos, gun, targets, bullets, timer, textbox, notice_bars)
+            check_keydown_events(event, settings, screen, stats, infos, gun, targets, bullets, textbox, notice_bars)
         elif event.type == pygame.KEYUP:    # 放开按键
             check_keyup_events(event, gun)
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:    # 单击鼠标左键
@@ -33,7 +32,7 @@ def check_play_button(settings, screen, stats, infos, gun, targets, bullets, tex
         start_game(settings, screen, stats, infos, gun, targets, bullets, notice_bars)
 
 
-def check_keydown_events(event, settings, screen, stats, infos, gun, targets, bullets, timer, textbox, notice_bars):
+def check_keydown_events(event, settings, screen, stats, infos, gun, targets, bullets, textbox, notice_bars):
     """响应按下按键"""
     if not stats.game_active:   # 游戏未开始，输入玩家昵称
         textbox.key_down(event)
@@ -46,7 +45,7 @@ def check_keydown_events(event, settings, screen, stats, infos, gun, targets, bu
         elif event.key == pygame.K_z:   # 按z键发射子弹
             fire_bullet(settings, screen, stats, infos, gun, bullets)
     if event.key == pygame.K_ESCAPE:    # 按esc键退出游戏
-        stop_timers(timer, targets, notice_bars)
+        stop_timers(stats, targets, notice_bars)
         sys.exit()
 
 
@@ -58,9 +57,9 @@ def check_keyup_events(event, gun):
         gun.moving_down = False
 
 
-def stop_timers(overall_timer, targets, notice_bars):
+def stop_timers(stats, targets, notice_bars):
     """停止所有计时器"""
-    overall_timer.stop()
+    stats.stop_timer()
     for target in targets.sprites():
         target.stop_timer()
         target.stop_shield_timer()
@@ -71,20 +70,35 @@ def stop_timers(overall_timer, targets, notice_bars):
 def start_game(settings, screen, stats, infos, gun, targets, bullets, notice_bars):
     # 隐藏光标
     pygame.mouse.set_visible(False)
+    # 重置游戏统计信息
     stats.game_active = True
+    stats.reset_stats()
     # 重置游戏数据图像
     infos.prep_bullets()
     infos.prep_timer()
-    # 清空子弹列表
+    # 清空靶机列表、子弹列表和提示条列表
+    targets.empty()
     bullets.empty()
+    notice_bars.empty()
     # 播放背景音乐
     pygame.mixer.music.play(-1)
     # 创建第一轮靶机
     create_targets(settings, screen, stats, targets, tl)
+    # 枪支居中
+    gun.center_gun()
     # 靶机移动提示
     prep_new_round(settings, screen, targets, notice_bars)
     # 开始计时
     stats.start_timer()
+
+
+def game_over(stats, infos, targets, notice_bars):
+    """弹药用尽，游戏结束"""
+    stats.game_active = False
+    pygame.mouse.set_visible(True)
+    stop_timers(stats, targets, notice_bars)
+    stats.new_timer()
+    infos.new_timer()
 
 
 def prep_new_round(settings, screen, targets, notice_bars):
@@ -106,13 +120,15 @@ def fire_bullet(settings, screen, stats, infos, gun, bullets):
         bullets.add(new_bullet)
 
 
-def update_bullets(settings, screen, stats, gun, targets, bullets, notice_bars):
+def update_bullets(settings, screen, stats, infos, gun, targets, bullets, notice_bars):
     """更新子弹位置，并删除已消失的子弹"""
     bullets.update()
+    check_bullet_target_collisions(settings, screen, stats, gun, targets, bullets, notice_bars)
     for bullet in bullets.copy():
         if bullet.rect.left >= screen.get_rect().right:
             bullets.remove(bullet)
-    check_bullet_target_collisions(settings, screen, stats, gun, targets, bullets, notice_bars)
+            if stats.bullet_left <= 0 and stats.target_left:
+                game_over(stats, infos, targets, notice_bars)
 
 
 def update_targets(targets):
@@ -138,6 +154,7 @@ def check_bullet_target_collisions(settings, screen, stats, gun, targets, bullet
         for target in targets.sprites():    # 统计总的靶机生命值
             target_life += target.life
         if target_life == 0:  # 该轮靶机全部击破，进入下一轮
+            stats.target_left = False
             if stats.round == settings.max_round:
                 stats.stop_timer()
                 show_result(stats)
@@ -149,6 +166,7 @@ def check_bullet_target_collisions(settings, screen, stats, gun, targets, bullet
 
 def create_targets(settings, screen, stats, targets, target_list=tl):
     """创建靶机"""
+    stats.target_left = True
     for target_attribute in target_list[stats.round-1]:
         if target_attribute[1]:     # target_attribute[1]为True，创建变速靶
             target = AccelerateTarget(settings, screen, *target_attribute)
@@ -180,7 +198,7 @@ def show_result(stats):
     print(round(stats.timer.pass_time, 2), stats.bullet_left)
 
 
-def update_screen(settings, screen, stats, infos, gun, target_sample, targets, bullets, notice_bars, text_box, play_button, timer):
+def update_screen(settings, screen, stats, infos, gun, target_sample, targets, bullets, notice_bars, text_box, play_button):
     """更新屏幕上的图像，并切换到新屏幕"""
     # 每次循环时重绘屏幕
     screen.fill(settings.bg_color)
@@ -192,7 +210,7 @@ def update_screen(settings, screen, stats, infos, gun, target_sample, targets, b
         notice_bar.draw_bar()
     for bullet in bullets.sprites():
         bullet.draw_bullet()
-    if timer.time_change:
+    if stats.timer.time_change:
         infos.prep_timer()
     infos.show_infos()
 

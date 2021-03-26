@@ -55,3 +55,6 @@ class MyTimer:
         self.start_time = time.time()
         self.pass_time = 0.0
         self.set_time(self.pass_time)
+
+    def new_timer(self):
+        self.timer = RepeatingTimer(0.1, self.update)

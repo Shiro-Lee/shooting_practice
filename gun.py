@@ -32,6 +32,11 @@ class Gun:
             self.centery += self.settings.gun_speed
         self.rect.centery = self.centery
 
+    def center_gun(self):
+        self.rect.centery = self.screen_rect.centery
+        self.rect.centerx = self.settings.x_gun_position
+        self.centery = self.rect.centery
+
     def blitme(self):
         """在指定位置绘制枪支"""
         self.screen.blit(self.image, self.rect)
