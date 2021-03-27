@@ -44,19 +44,19 @@ def run_game():
     # 创建输入框、开始按钮
     text_box = TextBox(screen, stats, func.start_game, settings, screen,
                        stats, infos, gun, targets, bullets, notice_bars)
-    play_button = Button(screen, text_box, '- Play -')
+    button = Button(screen, text_box)
 
     # 开始游戏主循环
     while True:
 
-        func.check_events(settings, screen, stats, infos, gun, targets, bullets, text_box, play_button, notice_bars)
+        func.check_events(settings, screen, stats, infos, gun, targets, bullets, text_box, button, notice_bars)
         if stats.game_state == GameState.RUNNING:
             gun.update()
-            func.update_bullets(settings, screen, stats, infos, gun, targets, bullets, notice_bars)
+            func.update_bullets(settings, screen, stats, infos, text_box, button, gun, targets, bullets, notice_bars)
             func.update_notice(notice_bars)
             func.update_targets(targets)
         func.update_screen(background, settings, screen, stats, infos, gun,
-                           target_sample, targets, bullets, notice_bars, text_box, play_button)
+                           target_sample, targets, bullets, notice_bars, text_box, button)
 
 
 run_game()

@@ -4,7 +4,7 @@ import pygame.font
 class Button:
     """按钮类"""
 
-    def __init__(self, screen, text_box, msg):
+    def __init__(self, screen, text_box):
         """初始化按钮的属性"""
         self.screen = screen
         self.screen_rect = screen.get_rect()
@@ -21,14 +21,21 @@ class Button:
         self.rect.centerx = self.text_box_rect.centerx
         self.rect.top = self.text_box_rect.bottom + 10
 
+        self.msg = '- Play -'
         self.msg_image, self.msg_image_rect = None, None
 
         # 按钮的标签只需创建一次
-        self.prep_msg(msg)
+        self.prep_msg()
 
-    def prep_msg(self, msg):
+    def game_over(self):
+        self.msg = '- Restart -'
+
+    def pregame(self):
+        self.msg = '- Play -'
+
+    def prep_msg(self):
         """将msg渲染为图像，并使其在按钮上居中"""
-        self.msg_image = self.font.render(msg, True, self.text_color, self.button_color)
+        self.msg_image = self.font.render(self.msg, True, self.text_color, self.button_color)
         self.msg_image_rect = self.msg_image.get_rect()
         self.msg_image_rect.center = self.rect.center
 

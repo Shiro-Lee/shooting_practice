@@ -29,6 +29,16 @@ class TextBox:
         self.prep_text()
         self.prep_notice_text()
 
+    def pregame(self):
+        self.text = ''
+        self.bg_color = (255, 255, 255)
+        self.notice_text = 'Input your name:'
+
+    def game_over(self):
+        self.text = 'You failed!'
+        self.bg_color = None
+        self.notice_text = ''
+
     def prep_notice_text(self):
         self.notice_text_image = self.notice_text_font.render(self.notice_text, True, self.text_color, None)
         self.notice_text_rect = self.notice_text_image.get_rect()
@@ -40,9 +50,10 @@ class TextBox:
         self.text_rect = self.text_image.get_rect()
         self.text_rect.center = self.box_rect.center
 
-    def draw_textbox(self):
+    def draw_text_box(self):
         self.screen.blit(self.notice_text_image, self.notice_text_rect)
-        self.screen.fill(self.bg_color, self.box_rect)
+        if self.bg_color is not None:
+            self.screen.fill(self.bg_color, self.box_rect)
         self.screen.blit(self.text_image, self.text_rect)
 
     def key_down(self, event):

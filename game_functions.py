@@ -7,37 +7,37 @@ from target_list import target_list as tl
 from music_and_sound import *
 
 
-def check_events(settings, screen, stats, infos, gun, targets, bullets, textbox, play_button, notice_bars):
+def check_events(settings, screen, stats, infos, gun, targets, bullets, text_box, play_button, notice_bars):
     """处理事件"""
     for event in pygame.event.get():
         if event.type == pygame.QUIT:   # 关闭窗口时退出游戏
             stop_timers(stats, targets, notice_bars)
             sys.exit()
         elif event.type == pygame.KEYDOWN:  # 按下按键
-            check_keydown_events(event, settings, screen, stats, infos, gun, targets, bullets, textbox, notice_bars)
+            check_keydown_events(event, settings, screen, stats, infos, gun, targets, bullets, text_box, notice_bars)
         elif event.type == pygame.KEYUP:    # 放开按键
             check_keyup_events(event, gun)
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:    # 单击鼠标左键
-            if stats.game_state == GameState.PREGAME:   # 游戏未开始时，单击按钮开始游戏
+            if stats.game_state == GameState.PREGAME or stats.game_state == GameState.GAME_OVER:   # 游戏未开始时，单击按钮开始游戏
                 mouse_x, mouse_y = pygame.mouse.get_pos()
-                check_play_button(settings, screen, stats, infos, gun, targets, bullets, textbox, play_button, mouse_x, mouse_y, notice_bars)
+                check_play_button(settings, screen, stats, infos, gun, targets, bullets, text_box, play_button, mouse_x, mouse_y, notice_bars)
             elif stats.game_state == GameState.RUNNING:   # 游戏开始时，单击发射子弹
                 fire_bullet(settings, screen, stats, infos, gun, bullets)
 
 
-def check_play_button(settings, screen, stats, infos, gun, targets, bullets, textbox, play_button, mouse_x, mouse_y, notice_bars):
+def check_play_button(settings, screen, stats, infos, gun, targets, bullets, text_box, play_button, mouse_x, mouse_y, notice_bars):
     """在玩家单击Play按钮时开始新游戏"""
     button_clicked = play_button.rect.collidepoint(mouse_x, mouse_y)
-    if button_clicked and textbox.text != '':   # 开始按钮被点击且输入玩家昵称不为空时开始游戏
-        stats.player_name = textbox.text
+    if button_clicked and text_box.text != '':   # 开始按钮被点击且输入玩家昵称不为空时开始游戏
+        stats.player_name = text_box.text
         start_game(settings, screen, stats, infos, gun, targets, bullets, notice_bars)
 
 
-def check_keydown_events(event, settings, screen, stats, infos, gun, targets, bullets, textbox, notice_bars):
+def check_keydown_events(event, settings, screen, stats, infos, gun, targets, bullets, text_box, notice_bars):
     """响应按下按键"""
-    if stats.game_state == GameState.PREGAME:   # 游戏未开始，输入玩家昵称
-        textbox.key_down(event)
-        textbox.prep_text()
+    if stats.game_state == GameState.PREGAME or stats.game_state == GameState.GAME_OVER:   # 游戏未开始，输入玩家昵称
+        text_box.key_down(event)
+        text_box.prep_text()
     elif stats.game_state == GameState.RUNNING:   # 游戏开始，处理相应事件
         if event.key == pygame.K_UP or event.key == pygame.K_w:     # 按上方向键或w键向上移动枪支
             gun.moving_up = True
@@ -94,11 +94,16 @@ def start_game(settings, screen, stats, infos, gun, targets, bullets, notice_bar
     stats.start_timer()
 
 
-def game_over(stats, infos, targets, notice_bars):
+def game_over(stats, infos, text_box, button, targets, notice_bars):
     """弹药用尽，游戏失败"""
     stats.game_state = GameState.GAME_OVER
     pygame.mouse.set_visible(True)
     stop_timers(stats, targets, notice_bars)
+    text_box.game_over()
+    text_box.prep_notice_text()
+    text_box.prep_text()
+    button.game_over()
+    button.prep_msg()
     stats.new_timer()
     infos.new_timer()
 
@@ -166,7 +171,7 @@ def check_target_edges(targets):
             target.direction *= -1
 
 
-def update_bullets(settings, screen, stats, infos, gun, targets, bullets, notice_bars):
+def update_bullets(settings, screen, stats, infos, text_box, button, gun, targets, bullets, notice_bars):
     """更新子弹位置，并删除已消失的子弹"""
     bullets.update()
     check_bullet_target_collisions(settings, screen, stats, gun, targets, bullets, notice_bars)
@@ -174,7 +179,7 @@ def update_bullets(settings, screen, stats, infos, gun, targets, bullets, notice
         if bullet.rect.left >= screen.get_rect().right:
             bullets.remove(bullet)
             if stats.bullet_left <= 0 and stats.target_left:    # 最后一枚子弹消失时若还有靶机未击破，则游戏失败
-                game_over(stats, infos, targets, notice_bars)
+                game_over(stats, infos, text_box, button, targets, notice_bars)
 
 
 def update_targets(targets):
@@ -204,8 +209,6 @@ def draw_target_sample(settings, target_sample, screen):
 def update_screen(background, settings, screen, stats, infos, gun,
                   target_sample, targets, bullets, notice_bars, text_box, play_button):
     """更新屏幕上的图像，并切换到新屏幕"""
-    # 每次循环时重绘屏幕
-    # screen.fill(settings.bg_color)
     screen.blit(background, (0, 0))
     if stats.round != settings.max_round:
         draw_target_sample(settings, target_sample, screen)
@@ -220,9 +223,9 @@ def update_screen(background, settings, screen, stats, infos, gun,
     infos.show_infos()
 
     # 如果游戏处在非活动状态就绘制Play按钮
-    if stats.game_state == GameState.PREGAME:
+    if stats.game_state == GameState.PREGAME or stats.game_state == GameState.GAME_OVER:
         play_button.draw_button()
-        text_box.draw_textbox()
+        text_box.draw_text_box()
 
     # 让最近绘制的屏幕可见
     pygame.display.flip()
