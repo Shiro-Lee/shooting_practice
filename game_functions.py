@@ -69,6 +69,7 @@ def stop_timers(stats, targets, notice_bars):
 
 
 def start_game(settings, screen, stats, infos, gun, targets, bullets, notice_bars):
+    """开始游戏"""
     # 隐藏光标
     pygame.mouse.set_visible(False)
     # 重置游戏统计信息
@@ -106,7 +107,6 @@ def game_finish(stats):
     """击破全部靶机，游戏胜利"""
     stats.stop_timer()
     stats.game_state = GameState.GAME_FINISH
-    print('%.2f' % stats.timer.pass_time, stats.bullet_left)
 
 
 def prep_new_round(settings, screen, targets, notice_bars):
@@ -201,10 +201,12 @@ def draw_target_sample(settings, target_sample, screen):
         screen.blit(target_sample.image, [x+i*target_width*2, y])
 
 
-def update_screen(settings, screen, stats, infos, gun, target_sample, targets, bullets, notice_bars, text_box, play_button):
+def update_screen(background, settings, screen, stats, infos, gun,
+                  target_sample, targets, bullets, notice_bars, text_box, play_button):
     """更新屏幕上的图像，并切换到新屏幕"""
     # 每次循环时重绘屏幕
-    screen.fill(settings.bg_color)
+    # screen.fill(settings.bg_color)
+    screen.blit(background, (0, 0))
     if stats.round != settings.max_round:
         draw_target_sample(settings, target_sample, screen)
     gun.blitme()

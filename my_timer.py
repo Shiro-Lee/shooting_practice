@@ -23,16 +23,15 @@ class MyTimer:
         self.time_str = ''          # 时间字符串
         self.timer = RepeatingTimer(0.01, self.update)  # 每0.01秒更新一次
 
-    def set_time(self, pass_time):
+    def set_time_str(self):
         """设定时间"""
-        seconds = int(pass_time)
-        mseconds = int((pass_time - seconds) * 100)
-        self.time_str = '%d″%02d' % (seconds, mseconds)
+        seconds = int(self.pass_time)
+        mseconds = (self.pass_time - seconds) * 100
+        self.time_str = '%d″%d' % (seconds, mseconds)
 
     def update(self):
         """更新时间"""
         self.pass_time = time.time() - self.start_time
-        self.set_time(self.pass_time)
         self.time_change = True
 
     def begin(self):
@@ -47,7 +46,6 @@ class MyTimer:
         if self.is_running:
             self.timer.cancel()
             self.pass_time = time.time() - self.start_time
-            self.set_time(self.pass_time)
             self.time_change = True
             self.is_running = False
 
@@ -55,7 +53,6 @@ class MyTimer:
         """重设"""
         self.start_time = time.time()
         self.pass_time = 0.0
-        self.set_time(self.pass_time)
 
     def new_timer(self):
-        self.timer = RepeatingTimer(0.1, self.update)
+        self.timer = RepeatingTimer(0.01, self.update)

@@ -16,12 +16,14 @@ def run_game():
 
     pygame.init()
 
-    # 设置窗口位置
+    # 设置窗口
     os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (128, 60)
-
     settings = Settings()
     screen = pygame.display.set_mode((settings.screen_width, settings.screen_height))
     pygame.display.set_caption("Shooting Practice")
+
+    # 背景图
+    background = pygame.image.load('images/background.jpg').convert()
 
     # 创建枪支、子弹编组
     gun = Gun(settings, screen)
@@ -40,7 +42,8 @@ def run_game():
     notice_bars = Group()
 
     # 创建输入框、开始按钮
-    text_box = TextBox(screen, stats, func.start_game, settings, screen, stats, infos, gun, targets, bullets, notice_bars)
+    text_box = TextBox(screen, stats, func.start_game, settings, screen,
+                       stats, infos, gun, targets, bullets, notice_bars)
     play_button = Button(screen, text_box, '- Play -')
 
     # 开始游戏主循环
@@ -52,7 +55,8 @@ def run_game():
             func.update_bullets(settings, screen, stats, infos, gun, targets, bullets, notice_bars)
             func.update_notice(notice_bars)
             func.update_targets(targets)
-        func.update_screen(settings, screen, stats, infos, gun, target_sample, targets, bullets, notice_bars, text_box, play_button)
+        func.update_screen(background, settings, screen, stats, infos, gun,
+                           target_sample, targets, bullets, notice_bars, text_box, play_button)
 
 
 run_game()
