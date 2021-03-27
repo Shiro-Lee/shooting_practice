@@ -8,8 +8,8 @@ class TextBox:
         self.width, self.height = 300, 50
         self.text = ''
         self.notice_text = 'Input your name:'
-        self.text_font = pygame.font.SysFont('arial', 32)
-        self.notice_text_font = pygame.font.SysFont('arial', 24)
+        self.text_font = pygame.font.SysFont('华文琥珀', 32)
+        self.notice_text_font = pygame.font.SysFont('华文琥珀', 24)
         self.text_color = (0, 0, 0)
         self.bg_color = (255, 255, 255)
         self.screen = screen

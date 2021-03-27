@@ -14,14 +14,14 @@ class InfoBoard:
 
         self.bullet_image = pygame.image.load('images/bullet.png')
         self.bullet_rect = self.bullet_image.get_rect()
-        self.bullet_rect.left, self.bullet_rect.top = self.settings.screen_width/15, settings.screen_height/15
+        self.bullet_rect.left, self.bullet_rect.top = self.settings.screen_width/15, settings.y_target_boundary
         self.timer_image, self.timer_rect = None, None
         self.bullet_left_image, self.bullet_left_rect = None, None
 
         # 字体设置
         self.text_color = (0, 0, 0)
-        self.bullet_font = pygame.font.SysFont('arial', 70)
-        self.timer_font = pygame.font.SysFont('arial', 48)
+        self.bullet_font = pygame.font.SysFont('华文彩云', 70)
+        self.timer_font = pygame.font.SysFont('华文琥珀', 48)
 
         self.prep_bullets()
         self.prep_timer()
