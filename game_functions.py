@@ -164,13 +164,6 @@ def create_targets(settings, screen, stats, targets, target_list=tl):
         targets.add(target)
 
 
-def check_target_edges(targets):
-    """有靶机到达边缘时更换方向"""
-    for target in targets.sprites():
-        if target.check_edges():
-            target.direction *= -1
-
-
 def update_bullets(settings, screen, stats, infos, text_box, button, gun, targets, bullets, notice_bars):
     """更新子弹位置，并删除已消失的子弹"""
     bullets.update()
@@ -184,7 +177,9 @@ def update_bullets(settings, screen, stats, infos, text_box, button, gun, target
 
 def update_targets(targets):
     """检查靶机是否到达边缘，并更新靶机位置"""
-    check_target_edges(targets)
+    for target in targets.sprites():
+        if target.check_edges():
+            target.direction *= -1
     targets.update()
 
 
