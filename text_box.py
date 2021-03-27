@@ -1,4 +1,5 @@
 import pygame
+from game_stats import GameState
 
 
 class TextBox:
@@ -58,15 +59,19 @@ class TextBox:
 
     def key_down(self, event):
         key = event.key
-        if key == pygame.K_BACKSPACE:   # 退格键
-            self.text = self.text[:-1]
-            self.length -= 1
-        elif key == pygame.K_RETURN:    # 回车键
-            if self.start_game and self.text != '':   # 按下回车且输入玩家昵称不为空时开始游戏
-                self.stats.player_name = self.text
+        if self.stats.game_state == GameState.PREGAME:
+            if key == pygame.K_BACKSPACE:   # 退格键
+                self.text = self.text[:-1]
+                self.length -= 1
+            elif key == pygame.K_RETURN:    # 回车键
+                if self.text != '':   # 按下回车且输入玩家昵称不为空时开始游戏
+                    self.stats.player_name = self.text
+                    self.start_game(*self.args)
+            elif event.unicode != '':   # 输入字符
+                if self.length < self.max_length:
+                    char = event.unicode
+                    self.length += 1
+                    self.text += char
+        elif self.stats.game_state == GameState.GAME_OVER:
+            if key == pygame.K_RETURN:  # 回车键
                 self.start_game(*self.args)
-        elif event.unicode != '':   # 输入字符
-            if self.length < self.max_length:
-                char = event.unicode
-                self.length += 1
-                self.text += char

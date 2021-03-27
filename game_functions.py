@@ -142,12 +142,6 @@ def check_bullet_target_collisions(settings, screen, stats, gun, targets, bullet
             target_life += target.life
         if target_life == 0:  # 该轮靶机全部击破
             stats.target_left = False
-            if stats.round == settings.max_round:   # 当前为最后一轮
-                game_finish(stats)
-            else:   # 进入下一轮
-                stats.round += 1
-                create_targets(settings, screen, stats, targets, tl)
-                prep_new_round(settings, screen, targets, notice_bars)
 
 
 def create_targets(settings, screen, stats, targets, target_list=tl):
@@ -171,8 +165,17 @@ def update_bullets(settings, screen, stats, infos, text_box, button, gun, target
     for bullet in bullets.copy():
         if bullet.rect.left >= screen.get_rect().right:
             bullets.remove(bullet)
-            if stats.bullet_left <= 0 and stats.target_left:    # 最后一枚子弹消失时若还有靶机未击破，则游戏失败
-                game_over(stats, infos, text_box, button, targets, notice_bars)
+            if stats.bullet_left <= 0:
+                if stats.target_left or not stats.target_left and stats.round != settings.max_round:    # 最后一枚子弹消失时若还有靶机未击破，则游戏失败
+                    game_over(stats, infos, text_box, button, targets, notice_bars)
+                    return
+            if not stats.target_left:
+                if stats.round == settings.max_round:   # 当前为最后一轮
+                    game_finish(stats)
+                else:   # 进入下一轮
+                    stats.round += 1
+                    create_targets(settings, screen, stats, targets, tl)
+                    prep_new_round(settings, screen, targets, notice_bars)
 
 
 def update_targets(targets):
