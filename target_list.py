@@ -2,7 +2,7 @@
 from random import choice
 
 # 最后一轮靶机的随机属性：加速度、是否带盾、延迟运动
-random_attribute = [(0.1, 0.2), (True, False), (0, 0.5)]
+random_attr = [(0.1, 0.2), (True, False), (0, 0.5)]
 
 # 定义每轮的靶机属性
 target_list = [
@@ -29,8 +29,8 @@ target_list = [
     [(2, False, 4, False, 0), (3, False, 4, False, 0.5)],
     [(3, False, 4, True, 0)],
     # 随机靶
-    [(0, True, choice(random_attribute[0]), choice(random_attribute[1]), choice(random_attribute[2])),
-     (1, True, choice(random_attribute[0]), choice(random_attribute[1]), choice(random_attribute[2])),
-     (2, True, choice(random_attribute[0]), choice(random_attribute[1]), choice(random_attribute[2])),
-     (3, True, choice(random_attribute[0]), choice(random_attribute[1]), choice(random_attribute[2]))]
+    [(0, True, choice(random_attr[0]), choice(random_attr[1]), choice(random_attr[2])),
+     (1, True, choice(random_attr[0]), choice(random_attr[1]), choice(random_attr[2])),
+     (2, True, choice(random_attr[0]), choice(random_attr[1]), choice(random_attr[2])),
+     (3, True, choice(random_attr[0]), choice(random_attr[1]), choice(random_attr[2]))]
 ]

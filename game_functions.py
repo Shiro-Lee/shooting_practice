@@ -94,12 +94,19 @@ def start_game(settings, screen, stats, infos, gun, targets, bullets, notice_bar
 
 
 def game_over(stats, infos, targets, notice_bars):
-    """弹药用尽，游戏结束"""
-    stats.game_state = GameState.PREGAME    # 应改为GameState.GAMEOVER！！
+    """弹药用尽，游戏失败"""
+    stats.game_state = GameState.GAME_OVER
     pygame.mouse.set_visible(True)
     stop_timers(stats, targets, notice_bars)
     stats.new_timer()
     infos.new_timer()
+
+
+def game_finish(stats):
+    """击破全部靶机，游戏胜利"""
+    stats.stop_timer()
+    stats.game_state = GameState.GAME_FINISH
+    print('%.2f' % stats.timer.pass_time, stats.bullet_left)
 
 
 def prep_new_round(settings, screen, targets, notice_bars):
@@ -121,32 +128,6 @@ def fire_bullet(settings, screen, stats, infos, gun, bullets):
         bullets.add(new_bullet)
 
 
-def update_bullets(settings, screen, stats, infos, gun, targets, bullets, notice_bars):
-    """更新子弹位置，并删除已消失的子弹"""
-    bullets.update()
-    check_bullet_target_collisions(settings, screen, stats, gun, targets, bullets, notice_bars)
-    for bullet in bullets.copy():
-        if bullet.rect.left >= screen.get_rect().right:
-            bullets.remove(bullet)
-            if stats.bullet_left <= 0 and stats.target_left:
-                game_over(stats, infos, targets, notice_bars)
-
-
-def update_targets(targets):
-    """检查靶机是否到达边缘，并更新靶机位置"""
-    check_target_edges(targets)
-    targets.update()
-
-
-def update_notice(notice_bars):
-    """更新提示条"""
-    for notice_bar in notice_bars.sprites():
-        if notice_bar.timer.pass_time > 1:  # 提示条出现1秒后消失
-            notice_bar.stop_timer()
-            notice_bars.remove(notice_bar)
-    notice_bars.update()
-
-
 def check_bullet_target_collisions(settings, screen, stats, gun, targets, bullets, notice_bars):
     """响应子弹和靶机的碰撞"""
     collisions = pygame.sprite.groupcollide(bullets, targets, False, True)
@@ -154,12 +135,11 @@ def check_bullet_target_collisions(settings, screen, stats, gun, targets, bullet
     if collisions:
         for target in targets.sprites():    # 统计总的靶机生命值
             target_life += target.life
-        if target_life == 0:  # 该轮靶机全部击破，进入下一轮
+        if target_life == 0:  # 该轮靶机全部击破
             stats.target_left = False
-            if stats.round == settings.max_round:
-                stats.stop_timer()
-                show_result(stats)
-            else:
+            if stats.round == settings.max_round:   # 当前为最后一轮
+                game_finish(stats)
+            else:   # 进入下一轮
                 stats.round += 1
                 create_targets(settings, screen, stats, targets, tl)
                 prep_new_round(settings, screen, targets, notice_bars)
@@ -179,15 +159,6 @@ def create_targets(settings, screen, stats, targets, target_list=tl):
         targets.add(target)
 
 
-def draw_target_sample(settings, target_sample, screen):
-    """绘制靶机示例"""
-    x = settings.x_target_position
-    y = settings.y_target_boundary
-    target_width = target_sample.rect.width
-    for i in range(4):
-        screen.blit(target_sample.image, [x+i*target_width*2, y])
-
-
 def check_target_edges(targets):
     """有靶机到达边缘时更换方向"""
     for target in targets.sprites():
@@ -195,8 +166,39 @@ def check_target_edges(targets):
             target.direction *= -1
 
 
-def show_result(stats):
-    print(round(stats.timer.pass_time, 2), stats.bullet_left)
+def update_bullets(settings, screen, stats, infos, gun, targets, bullets, notice_bars):
+    """更新子弹位置，并删除已消失的子弹"""
+    bullets.update()
+    check_bullet_target_collisions(settings, screen, stats, gun, targets, bullets, notice_bars)
+    for bullet in bullets.copy():
+        if bullet.rect.left >= screen.get_rect().right:
+            bullets.remove(bullet)
+            if stats.bullet_left <= 0 and stats.target_left:    # 最后一枚子弹消失时若还有靶机未击破，则游戏失败
+                game_over(stats, infos, targets, notice_bars)
+
+
+def update_targets(targets):
+    """检查靶机是否到达边缘，并更新靶机位置"""
+    check_target_edges(targets)
+    targets.update()
+
+
+def update_notice(notice_bars):
+    """更新提示条"""
+    for notice_bar in notice_bars.sprites():
+        if notice_bar.timer.pass_time > 1:  # 提示条出现1秒后消失
+            notice_bar.stop_timer()
+            notice_bars.remove(notice_bar)
+    notice_bars.update()
+
+
+def draw_target_sample(settings, target_sample, screen):
+    """绘制靶机示例"""
+    x = settings.x_target_position
+    y = settings.y_target_boundary
+    target_width = target_sample.rect.width
+    for i in range(4):
+        screen.blit(target_sample.image, [x+i*target_width*2, y])
 
 
 def update_screen(settings, screen, stats, infos, gun, target_sample, targets, bullets, notice_bars, text_box, play_button):

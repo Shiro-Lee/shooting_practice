@@ -21,13 +21,13 @@ class MyTimer:
         self.is_running = False     # 秒表是否在运行，默认为否
         self.time_change = False    # 标志是否已经过0.1秒
         self.time_str = ''          # 时间字符串
-        self.timer = RepeatingTimer(0.1, self.update)  # 每0.1秒更新一次
+        self.timer = RepeatingTimer(0.01, self.update)  # 每0.01秒更新一次
 
     def set_time(self, pass_time):
         """设定时间"""
         seconds = int(pass_time)
-        mseconds = int((pass_time - seconds) * 10)
-        self.time_str = '%d″%01d' % (seconds, mseconds)
+        mseconds = int((pass_time - seconds) * 100)
+        self.time_str = '%d″%02d' % (seconds, mseconds)
 
     def update(self):
         """更新时间"""
@@ -48,6 +48,7 @@ class MyTimer:
             self.timer.cancel()
             self.pass_time = time.time() - self.start_time
             self.set_time(self.pass_time)
+            self.time_change = True
             self.is_running = False
 
     def reset(self):
