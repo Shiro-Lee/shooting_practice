@@ -3,7 +3,7 @@ import os
 import game_functions as func
 from pygame.sprite import Group
 from gun import Gun
-from game_stats import GameStats
+from game_stats import GameStats, GameState
 from settings import Settings
 from info_board import InfoBoard
 from my_timer import MyTimer
@@ -47,7 +47,7 @@ def run_game():
     while True:
 
         func.check_events(settings, screen, stats, infos, gun, targets, bullets, text_box, play_button, notice_bars)
-        if stats.game_active:
+        if stats.game_state == GameState.RUNNING:
             gun.update()
             func.update_bullets(settings, screen, stats, infos, gun, targets, bullets, notice_bars)
             func.update_notice(notice_bars)

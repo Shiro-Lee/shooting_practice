@@ -5,6 +5,7 @@
       <w>blitme</w>
       <w>centerx</w>
       <w>centery</w>
+      <w>gameover</w>
       <w>infos</w>
       <w>keydown</w>
       <w>keyup</w>

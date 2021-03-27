@@ -1,4 +1,5 @@
 import sys
+from game_stats import GameState
 from bullet import Bullet
 from target import UniformTarget, AccelerateTarget
 from notice_bar import NoticeBar
@@ -17,10 +18,10 @@ def check_events(settings, screen, stats, infos, gun, targets, bullets, textbox,
         elif event.type == pygame.KEYUP:    # 放开按键
             check_keyup_events(event, gun)
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:    # 单击鼠标左键
-            if not stats.game_active:   # 游戏未开始时，单击按钮开始游戏
+            if stats.game_state == GameState.PREGAME:   # 游戏未开始时，单击按钮开始游戏
                 mouse_x, mouse_y = pygame.mouse.get_pos()
                 check_play_button(settings, screen, stats, infos, gun, targets, bullets, textbox, play_button, mouse_x, mouse_y, notice_bars)
-            else:   # 游戏开始时，单击发射子弹
+            elif stats.game_state == GameState.RUNNING:   # 游戏开始时，单击发射子弹
                 fire_bullet(settings, screen, stats, infos, gun, bullets)
 
 
@@ -34,10 +35,10 @@ def check_play_button(settings, screen, stats, infos, gun, targets, bullets, tex
 
 def check_keydown_events(event, settings, screen, stats, infos, gun, targets, bullets, textbox, notice_bars):
     """响应按下按键"""
-    if not stats.game_active:   # 游戏未开始，输入玩家昵称
+    if stats.game_state == GameState.PREGAME:   # 游戏未开始，输入玩家昵称
         textbox.key_down(event)
         textbox.prep_text()
-    else:   # 游戏开始，处理相应事件
+    elif stats.game_state == GameState.RUNNING:   # 游戏开始，处理相应事件
         if event.key == pygame.K_UP or event.key == pygame.K_w:     # 按上方向键或w键向上移动枪支
             gun.moving_up = True
         elif event.key == pygame.K_DOWN or event.key == pygame.K_s:     # 按下方向键或s键向下移动枪支
@@ -71,7 +72,7 @@ def start_game(settings, screen, stats, infos, gun, targets, bullets, notice_bar
     # 隐藏光标
     pygame.mouse.set_visible(False)
     # 重置游戏统计信息
-    stats.game_active = True
+    stats.game_state = GameState.RUNNING
     stats.reset_stats()
     # 重置游戏数据图像
     infos.prep_bullets()
@@ -94,7 +95,7 @@ def start_game(settings, screen, stats, infos, gun, targets, bullets, notice_bar
 
 def game_over(stats, infos, targets, notice_bars):
     """弹药用尽，游戏结束"""
-    stats.game_active = False
+    stats.game_state = GameState.PREGAME    # 应改为GameState.GAMEOVER！！
     pygame.mouse.set_visible(True)
     stop_timers(stats, targets, notice_bars)
     stats.new_timer()
@@ -215,7 +216,7 @@ def update_screen(settings, screen, stats, infos, gun, target_sample, targets, b
     infos.show_infos()
 
     # 如果游戏处在非活动状态就绘制Play按钮
-    if not stats.game_active:
+    if stats.game_state == GameState.PREGAME:
         play_button.draw_button()
         text_box.draw_textbox()
 

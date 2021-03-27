@@ -1,3 +1,13 @@
+from enum import Enum
+
+
+class GameState(Enum):
+    """枚举游戏状态"""
+    PREGAME = 0     # 游戏开始前
+    RUNNING = 1     # 游戏进行中
+    GAMEOVER = 2    # 游戏结束
+
+
 class GameStats:
     """跟踪游戏的统计信息"""
     bullet_left: int
@@ -7,7 +17,7 @@ class GameStats:
         """初始化统计信息"""
         self.settings = settings
         self.timer = timer
-        self.game_active = False    # 游戏开始标记
+        self.game_state = GameState.PREGAME    # 游戏状态
         self.player_name = ''   # 玩家名
         self.round = 1  # 轮数
         self.target_left = True
