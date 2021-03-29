@@ -40,12 +40,10 @@ def run_game():
     stats = GameStats(settings, overall_timer)
     running_info = RunningInfo(settings, screen, stats)
     win_info = WinInfo(settings, screen, stats)
-    failed_info = FailedInfo(screen, stats, func.start_game,
-                             settings, screen, stats, running_info, gun, targets, bullets, notice_bars)
+    failed_info = FailedInfo(screen, stats)
 
     # 创建输入框
-    text_box = TextBox(screen, stats, func.start_game,
-                       settings, screen, stats, running_info, gun, targets, bullets, notice_bars)
+    text_box = TextBox(screen, stats)
 
     # 开始游戏主循环
     while True:
@@ -55,8 +53,7 @@ def run_game():
         # 游戏进行中，更新枪支、子弹、靶机提示条、靶机位置
         if stats.game_state == GameState.RUNNING:
             gun.update()
-            func.update_bullets(settings, screen, stats, running_info, text_box,
-                                gun, targets, bullets, notice_bars)
+            func.update_bullets(settings, screen, stats, gun, targets, bullets, notice_bars)
             func.update_notice(notice_bars)
             func.update_targets(targets)
         # 更新屏幕

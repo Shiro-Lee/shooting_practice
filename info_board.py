@@ -1,6 +1,5 @@
 import pygame.font
 from button import Button
-from game_stats import GameState
 
 
 class RunningInfo:
@@ -46,15 +45,12 @@ class RunningInfo:
         # 将计时数显示在左下角
         self.timer_rect = self.timer_image.get_rect()
         self.timer_rect.left = self.settings.screen_width/15
-        self.timer_rect.bottom = self.screen_rect.bottom - self.settings.screen_height/15
+        self.timer_rect.bottom = self.screen_rect.bottom - self.settings.y_target_boundary
 
     def show_info(self):
         self.screen.blit(self.bullet_image, self.bullet_rect)
         self.screen.blit(self.bullet_left_image, self.bullet_left_rect)
         self.screen.blit(self.timer_image, self.timer_rect)
-
-    def new_timer(self):
-        self.timer = self.stats.overall_timer
 
 
 class WinInfo:
@@ -69,9 +65,15 @@ class WinInfo:
         self.bullet_left_info, self.bullet_left_info_image, self.bullet_left_info_rect = None, None, None
         self.time_used_info, self.time_used_info_image, self.time_used_info_rect = None, None, None
         self.total_score_info, self.total_score_info_image, self.total_score_rect = None, None, None
+
         self.win_image = self.win_font.render('YOU WIN', True, self.text_color)
         self.win_rect = self.win_image.get_rect()
         self.win_rect.centerx, self.win_rect.top = self.screen.get_rect().centerx, settings.y_target_boundary
+
+        self.restart_button = Button(screen, '- Restart -')
+        self.restart_button.rect.centerx = self.win_rect.centerx
+        self.restart_button.rect.bottom = self.screen.get_rect().bottom - settings.y_target_boundary
+        self.restart_button.prep_msg()
 
     def prep_score(self):
         # 剩余弹药得分
@@ -98,16 +100,15 @@ class WinInfo:
         self.screen.blit(self.bullet_left_info_image, self.bullet_left_info_rect)
         self.screen.blit(self.time_used_info_image, self.time_used_info_rect)
         self.screen.blit(self.total_score_info_image, self.total_score_rect)
+        self.restart_button.draw_button()
 
 
 class FailedInfo:
     """游戏失败信息显示"""
-    def __init__(self, screen, stats, start_game=None, *args):
+    def __init__(self, screen, stats):
 
         self.screen = screen
         self.stats = stats
-        self.start_game = start_game
-        self.args = args
 
         self.failed_text = 'YOU FAILED'
         self.failed_font = pygame.font.SysFont('华文琥珀', 60)
@@ -120,11 +121,6 @@ class FailedInfo:
         self.restart_button.rect.centerx = self.failed_rect.centerx
         self.restart_button.rect.top = self.failed_rect.bottom + 10
         self.restart_button.prep_msg()
-
-    def key_down(self, event):
-        if self.stats.game_state == GameState.GAME_OVER:
-            if event.key == pygame.K_RETURN:  # 回车键
-                self.start_game(*self.args)
 
     def show_info(self):
         self.screen.blit(self.text_image, self.failed_rect)

@@ -5,7 +5,7 @@ from button import Button
 class TextBox:
     """玩家名输入框"""
 
-    def __init__(self, screen, stats, start_game=None, *args):
+    def __init__(self, screen, stats):
         self.width, self.height = 300, 50
         self.text = ''
         self.notice_text = 'Input your name:'
@@ -17,10 +17,8 @@ class TextBox:
         self.stats = stats
         self.screen_rect = screen.get_rect()
         self.text_image, self.text_rect = None, None
-        self.start_game = start_game
         self.length = 0
         self.max_length = 10    # 玩家id最长为10个字符
-        self.args = args
 
         # 创建文本框的rect对象，并使其居中
         self.box_rect = pygame.Rect(0, 0, self.width, self.height)
@@ -58,10 +56,6 @@ class TextBox:
         if key == pygame.K_BACKSPACE:   # 退格键
             self.text = self.text[:-1]
             self.length -= 1
-        elif key == pygame.K_RETURN:    # 回车键
-            if self.text != '':   # 按下回车且输入玩家昵称不为空时开始游戏
-                self.stats.player_name = self.text
-                self.start_game(*self.args)
         elif event.unicode != '':   # 输入字符
             if self.length < self.max_length:
                 char = event.unicode
