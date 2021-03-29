@@ -21,7 +21,7 @@ class Settings:
         self.gun_speed = 1
 
         # 子弹设置
-        self.bullet_speed = 8
+        self.bullet_speed = 10
         self.bullet_width = 16
         self.bullet_height = 4
         self.bullet_color = (0, 0, 0)
