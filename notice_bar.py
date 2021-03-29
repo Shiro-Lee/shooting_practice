@@ -5,7 +5,6 @@ from my_timer import MyTimer
 
 class NoticeBar(Sprite):
     """靶机启动提示条"""
-
     def __init__(self, settings, screen, target):
         super().__init__()
         self.settings = settings

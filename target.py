@@ -15,10 +15,8 @@ class TargetSample:
 
 class Target(TargetSample, Sprite):
     """靶机类"""
-
     def __init__(self, settings, screen, *args):
         """初始化靶机并设置其起始位置"""
-
         TargetSample.__init__(self)
         Sprite.__init__(self)
         self.settings = settings
@@ -137,4 +135,5 @@ class AccelerateTarget(Target):
             self.moving = True
 
     def check_edges(self):
+        """变速靶与匀速靶变换移动方向逻辑不同"""
         pass

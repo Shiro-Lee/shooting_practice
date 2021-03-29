@@ -4,7 +4,6 @@ from threading import Timer
 
 class RepeatingTimer(Timer):
     """"自定义循环定时器，继承自threading.Timer"""
-
     def run(self):
         """重写run方法，使function在单个线程内循环执行"""
         while not self.finished.is_set():
@@ -14,7 +13,6 @@ class RepeatingTimer(Timer):
 
 class MyTimer:
     """打靶计时器"""
-
     def __init__(self):
         self.start_time = 0.0       # 开始时间设为 0
         self.pass_time = 0.0        # 已经过去了的时间设为 0

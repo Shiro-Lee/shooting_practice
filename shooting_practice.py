@@ -5,9 +5,8 @@ from pygame.sprite import Group
 from gun import Gun
 from game_stats import GameStats, GameState
 from settings import Settings
-from info_board import InfoBoard
+from info_board import RunningInfo, WinInfo, FailedInfo
 from my_timer import MyTimer
-from button import Button
 from text_box import TextBox
 from target import TargetSample
 
@@ -30,33 +29,39 @@ def run_game():
     bullets = Group()
 
     # 创建全局计时器
-    timer = MyTimer()
-
-    # 创建用于存储游戏统计信息的实例，并创建信息显示板
-    stats = GameStats(settings, timer)
-    infos = InfoBoard(settings, screen, stats)
+    overall_timer = MyTimer()
 
     # 创建靶机编组、提示条编组
     target_sample = TargetSample()
     targets = Group()
     notice_bars = Group()
 
-    # 创建输入框、开始按钮
-    text_box = TextBox(screen, stats, func.start_game, settings, screen,
-                       stats, infos, gun, targets, bullets, notice_bars)
-    button = Button(screen, text_box)
+    # 创建用于存储游戏统计信息的实例，并创建信息显示板
+    stats = GameStats(settings, overall_timer)
+    running_info = RunningInfo(settings, screen, stats)
+    win_info = WinInfo(settings, screen, stats)
+    failed_info = FailedInfo(screen, stats, func.start_game,
+                             settings, screen, stats, running_info, gun, targets, bullets, notice_bars)
+
+    # 创建输入框
+    text_box = TextBox(screen, stats, func.start_game,
+                       settings, screen, stats, running_info, gun, targets, bullets, notice_bars)
 
     # 开始游戏主循环
     while True:
-
-        func.check_events(settings, screen, stats, infos, gun, targets, bullets, text_box, button, notice_bars)
+        # 检查事件
+        func.check_events(settings, screen, stats, running_info, win_info, failed_info,
+                          gun, targets, bullets, text_box, notice_bars)
+        # 游戏进行中，更新枪支、子弹、靶机提示条、靶机位置
         if stats.game_state == GameState.RUNNING:
             gun.update()
-            func.update_bullets(settings, screen, stats, infos, text_box, button, gun, targets, bullets, notice_bars)
+            func.update_bullets(settings, screen, stats, running_info, text_box,
+                                gun, targets, bullets, notice_bars)
             func.update_notice(notice_bars)
             func.update_targets(targets)
-        func.update_screen(background, settings, screen, stats, infos, gun,
-                           target_sample, targets, bullets, notice_bars, text_box, button)
+        # 更新屏幕
+        func.update_screen(background, settings, screen, stats, running_info, win_info, failed_info, gun,
+                           target_sample, targets, bullets, notice_bars, text_box)
 
 
 run_game()

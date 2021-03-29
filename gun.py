@@ -2,6 +2,7 @@ import pygame
 
 
 class Gun:
+    """枪支类"""
 
     def __init__(self, settings, screen):
         """初始化枪支并设置初始位置"""
@@ -33,6 +34,7 @@ class Gun:
         self.rect.centery = self.centery
 
     def center_gun(self):
+        """将枪支垂直居中到屏幕左侧"""
         self.rect.centery = self.screen_rect.centery
         self.rect.centerx = self.settings.x_gun_position
         self.centery = self.rect.centery
