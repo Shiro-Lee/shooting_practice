@@ -77,19 +77,19 @@ class WinInfo:
 
     def prep_score(self):
         # 剩余弹药得分
-        self.bullet_left_info = 'Bullet left score: ' + str(self.stats.bullet_left_score)
+        self.bullet_left_info = 'Bullet Left Score: ' + str(self.stats.bullet_left_score)
         self.bullet_left_info_image = self.stats_font.render(self.bullet_left_info, True, self.text_color)
         self.bullet_left_info_rect = self.bullet_left_info_image.get_rect()
         self.bullet_left_info_rect.centerx = self.win_rect.centerx
         self.bullet_left_info_rect.top = self.win_rect.bottom + 10
         # 耗时得分
-        self.time_used_info = 'Time used score: ' + str(self.stats.time_used_score)
+        self.time_used_info = 'Time Used Score: ' + str(self.stats.time_used_score)
         self.time_used_info_image = self.stats_font.render(self.time_used_info, True, self.text_color)
         self.time_used_info_rect = self.time_used_info_image.get_rect()
         self.time_used_info_rect.centerx = self.win_rect.centerx
         self.time_used_info_rect.top = self.bullet_left_info_rect.bottom
         # 总分
-        self.total_score_info = 'Total score: ' + str(self.stats.total_score)
+        self.total_score_info = 'Total Score: ' + str(self.stats.total_score)
         self.total_score_info_image = self.stats_font.render(self.total_score_info, True, self.text_color)
         self.total_score_rect = self.total_score_info_image.get_rect()
         self.total_score_rect.centerx = self.win_rect.centerx

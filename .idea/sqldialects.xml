@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="SqlDialectMappings">
-    <file url="file://$PROJECT_DIR$/test/pymysql_test.py" dialect="MySQL" />
+    <file url="file://$PROJECT_DIR$/mysql_helper.py" dialect="MySQL" />
+    <file url="file://$PROJECT_DIR$/sql_functions.py" dialect="MySQL" />
+  </component>
+  <component name="SqlResolveMappings">
+    <file url="PROJECT" scope="{&quot;node&quot;:{  &quot;@negative&quot;:&quot;1&quot;,  &quot;group&quot;:{   &quot;@kind&quot;:&quot;root&quot;,   &quot;node&quot;:{    &quot;name&quot;:{     &quot;@name&quot;:&quot;5b164c82-3af8-41a5-9a40-b05985cfc7f8&quot;,     &quot;@quoted&quot;:&quot;1&quot;    },    &quot;group&quot;:{     &quot;@kind&quot;:&quot;schema&quot;,     &quot;node&quot;:{      &quot;name&quot;:{       &quot;@name&quot;:&quot;shooting_practice&quot;,       &quot;@quoted&quot;:&quot;1&quot;      }     }    }   }  } }}" />
   </component>
 </project>

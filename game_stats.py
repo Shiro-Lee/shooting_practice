@@ -19,8 +19,9 @@ class GameStats:
         self.game_state = GameState.PREGAME    # 游戏状态
         self.player_name = ''   # 玩家名
         self.round = 1  # 轮数
-        self.bullet_left = self.settings.bullet_limit
         self.target_left = True
+        self.bullet_left = self.settings.bullet_limit
+        self.time_used = 0
         self.bullet_left_score = 0
         self.time_used_score = 0
         self.total_score = 0
@@ -29,6 +30,7 @@ class GameStats:
         """重置统计信息"""
         self.round = 1
         self.bullet_left = self.settings.bullet_limit
+        self.time_used = 0
         self.target_left = True
         self.reset_timer()
 

@@ -1,4 +1,5 @@
 import sys
+import sql_functions as sf
 from game_stats import GameState
 from bullet import Bullet
 from target import UniformTarget, AccelerateTarget
@@ -8,30 +9,62 @@ from music_and_sound import *
 
 
 def check_events(settings, screen, stats, running_info, win_info, failed_info,
-                 gun, targets, bullets, text_box, notice_bars):
+                 gun, targets, bullets, text_box, notice_bars, mysql_helper):
     """处理事件"""
     for event in pygame.event.get():
-        if event.type == pygame.QUIT:   # 关闭窗口时退出游戏
-            stop_timers(stats, targets, notice_bars)
-            sys.exit()
-        elif event.type == pygame.KEYDOWN:  # 按下按键
-            check_keydown_events(event, settings, screen, stats, running_info,
-                                 gun, targets, bullets, text_box, notice_bars)
-        elif event.type == pygame.KEYUP:    # 放开按键
-            check_keyup_events(event, gun)
-        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:    # 单击鼠标左键
-            mouse_x, mouse_y = pygame.mouse.get_pos()
-            if stats.game_state == GameState.PREGAME:   # 游戏未开始时，单击按钮开始游戏
-                check_play_button(settings, screen, stats, running_info, gun, targets, bullets,
-                                  text_box, mouse_x, mouse_y, notice_bars)
-            elif stats.game_state == GameState.GAME_OVER:
+        # 游戏未开始
+        if stats.game_state == GameState.PREGAME:
+                check_pregame_events(event, settings, screen, stats, running_info,
+                                     gun, targets, bullets, text_box, notice_bars)
+        # 游戏进行中
+        elif stats.game_state == GameState.RUNNING:
+            check_running_events(event, settings, screen, stats, running_info, gun, bullets)
+        # 游戏失败
+        elif stats.game_state == GameState.GAME_OVER:
+            if event.type == pygame.KEYDOWN:    # 按下按键
+                if event.key == pygame.K_RETURN:
+                    start_game(settings, screen, stats, running_info, gun, targets, bullets, notice_bars)
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                mouse_x, mouse_y = pygame.mouse.get_pos()
                 check_restart_button(settings, screen, stats, running_info, failed_info,
                                      gun, targets, bullets, mouse_x, mouse_y, notice_bars)
-            elif stats.game_state == GameState.GAME_FINISH:
+        # 游戏胜利
+        elif stats.game_state == GameState.GAME_FINISH:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:
+                    start_game(settings, screen, stats, running_info, gun, targets, bullets, notice_bars)
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                mouse_x, mouse_y = pygame.mouse.get_pos()
                 check_restart_button(settings, screen, stats, running_info, win_info,
                                      gun, targets, bullets, mouse_x, mouse_y, notice_bars)
-            elif stats.game_state == GameState.RUNNING:   # 游戏开始时，单击发射子弹
-                fire_bullet(settings, screen, stats, running_info, gun, bullets)
+        # 关闭窗口或按esc键时退出游戏
+        if event.type == pygame.QUIT or event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+            stop_timers(stats, targets, notice_bars)
+            mysql_helper.close()
+            sys.exit()
+
+
+def check_pregame_events(event, settings, screen, stats, running_info, gun, targets, bullets, text_box, notice_bars):
+    if event.type == pygame.KEYDOWN:
+        if event.key == pygame.K_RETURN and text_box.text != '':  # 按下回车且输入玩家昵称不为空时开始游戏
+            stats.player_name = text_box.text
+            start_game(settings, screen, stats, running_info, gun, targets, bullets, notice_bars)
+        else:  # 输入玩家名
+            text_box.key_down(event)
+            text_box.prep_text()
+    elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:  # 单击鼠标左键
+        mouse_x, mouse_y = pygame.mouse.get_pos()
+        check_play_button(settings, screen, stats, running_info, gun, targets, bullets,
+                          text_box, mouse_x, mouse_y, notice_bars)
+
+
+def check_running_events(event, settings, screen, stats, running_info, gun, bullets):
+    if event.type == pygame.KEYDOWN:  # 按下按键
+        check_running_keydown_events(event, settings, screen, stats, running_info, gun, bullets)
+    elif event.type == pygame.KEYUP:  # 放开按键
+        check_running_keyup_events(event, gun)
+    elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:  # 单击发射子弹
+        fire_bullet(settings, screen, stats, running_info, gun, bullets)
 
 
 def check_play_button(settings, screen, stats, running_info, gun, targets, bullets,
@@ -50,31 +83,17 @@ def check_restart_button(settings, screen, stats, running_info, info, gun, targe
         start_game(settings, screen, stats, running_info, gun, targets, bullets, notice_bars)
 
 
-def check_keydown_events(event, settings, screen, stats, running_info, gun, targets, bullets, text_box, notice_bars):
+def check_running_keydown_events(event, settings, screen, stats, running_info, gun, bullets):
     """响应按下按键"""
-    if stats.game_state == GameState.PREGAME:   # 游戏未开始，输入玩家昵称
-        if event.key == pygame.K_RETURN and text_box.text != '':    # 按下回车且输入玩家昵称不为空时开始游戏
-            stats.player_name = text_box.text
-            start_game(settings, screen, stats, running_info, gun, targets, bullets, notice_bars)
-        else:   # 输入玩家名
-            text_box.key_down(event)
-            text_box.prep_text()
-    elif stats.game_state == GameState.GAME_OVER or stats.game_state == GameState.GAME_FINISH:   # 游戏结束
-        if event.key == pygame.K_RETURN:
-            start_game(settings, screen, stats, running_info, gun, targets, bullets, notice_bars)
-    elif stats.game_state == GameState.RUNNING:   # 游戏开始，处理相应事件
-        if event.key == pygame.K_UP or event.key == pygame.K_w:     # 按上方向键或w键向上移动枪支
-            gun.moving_up = True
-        elif event.key == pygame.K_DOWN or event.key == pygame.K_s:     # 按下方向键或s键向下移动枪支
-            gun.moving_down = True
-        elif event.key == pygame.K_z:   # 按z键发射子弹
-            fire_bullet(settings, screen, stats, running_info, gun, bullets)
-    if event.key == pygame.K_ESCAPE:    # 任何时候都可以按esc键退出游戏
-        stop_timers(stats, targets, notice_bars)
-        sys.exit()
+    if event.key == pygame.K_UP or event.key == pygame.K_w:     # 按上方向键或w键向上移动枪支
+        gun.moving_up = True
+    elif event.key == pygame.K_DOWN or event.key == pygame.K_s:     # 按下方向键或s键向下移动枪支
+        gun.moving_down = True
+    elif event.key == pygame.K_z:   # 按z键发射子弹
+        fire_bullet(settings, screen, stats, running_info, gun, bullets)
 
 
-def check_keyup_events(event, gun):
+def check_running_keyup_events(event, gun):
     """响应松开按键"""
     if event.key == pygame.K_UP or event.key == pygame.K_w:
         gun.moving_up = False
@@ -130,9 +149,11 @@ def game_finish(stats, mysql_helper):
     """击破全部靶机，游戏胜利"""
     stats.game_state = GameState.GAME_FINISH
     pygame.mouse.set_visible(True)
+    stats.time_used = stats.overall_timer.pass_time
     stats.stop_timer()
     stats.new_timer()
     cal_score(stats)
+    sf.check_player(stats, mysql_helper)
 
 
 def cal_score(stats):
@@ -140,7 +161,7 @@ def cal_score(stats):
     # 剩余弹药分=剩余弹药数*100
     bullet_left_score = stats.bullet_left * 100
     # 耗时得分=(200-耗时)*50
-    time_used_score = int((200-stats.overall_timer.pass_time)*50) if stats.overall_timer.pass_time < 200 else 0
+    time_used_score = int((200-stats.time_used)*50) if stats.time_used < 200 else 0
     total_score = bullet_left_score + time_used_score
     stats.bullet_left_score = bullet_left_score
     stats.time_used_score = time_used_score

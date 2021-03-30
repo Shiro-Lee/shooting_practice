@@ -1117,99 +1117,138 @@
       <Charset>utf8mb4</Charset>
       <DefaultForCharset>0</DefaultForCharset>
     </collation>
-    <table id="281" parent="6" name="bullet_rank"/>
-    <table id="282" parent="6" name="speed_rank"/>
-    <table id="283" parent="6" name="total_rank"/>
+    <table id="281" parent="6" name="bullet"/>
+    <table id="282" parent="6" name="speed"/>
+    <table id="283" parent="6" name="total"/>
     <table id="284" parent="9" name="employee"/>
-    <column id="285" parent="281" name="player_name">
+    <column id="285" parent="281" name="_id">
       <Position>1</Position>
-      <DataType>char(10)|0s</DataType>
-      <ColumnKind>normal</ColumnKind>
-    </column>
-    <column id="286" parent="281" name="bullet_left">
-      <Position>2</Position>
       <DataType>smallint(6)|0s</DataType>
+      <NotNull>1</NotNull>
+      <SequenceIdentity>1</SequenceIdentity>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="287" parent="281" name="score">
+    <column id="286" parent="281" name="player_name">
+      <Position>2</Position>
+      <DataType>char(10)|0s</DataType>
+      <NotNull>1</NotNull>
+      <ColumnKind>normal</ColumnKind>
+    </column>
+    <column id="287" parent="281" name="bullet_left">
       <Position>3</Position>
       <DataType>smallint(6)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="288" parent="281" name="scroe_rank">
+    <column id="288" parent="281" name="score">
       <Position>4</Position>
       <DataType>smallint(6)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="289" parent="282" name="player_name">
+    <index id="289" parent="281" name="bullet_rank_player_name_uindex">
+      <ColNames>player_name</ColNames>
+      <Unique>1</Unique>
+      <Type>btree</Type>
+    </index>
+    <key id="290" parent="281" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <ColNames>_id</ColNames>
+      <Primary>1</Primary>
+    </key>
+    <key id="291" parent="281" name="bullet_rank_player_name_uindex">
+      <ColNames>player_name</ColNames>
+      <UnderlyingIndexName>bullet_rank_player_name_uindex</UnderlyingIndexName>
+    </key>
+    <column id="292" parent="282" name="_id">
       <Position>1</Position>
+      <DataType>smallint(6)|0s</DataType>
+      <NotNull>1</NotNull>
+      <SequenceIdentity>1</SequenceIdentity>
+      <ColumnKind>normal</ColumnKind>
+    </column>
+    <column id="293" parent="282" name="player_name">
+      <Position>2</Position>
       <DataType>char(10)|0s</DataType>
       <NotNull>1</NotNull>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="290" parent="282" name="time_used">
-      <Position>2</Position>
-      <DataType>smallint(6)|0s</DataType>
-      <ColumnKind>normal</ColumnKind>
-    </column>
-    <column id="291" parent="282" name="score">
+    <column id="294" parent="282" name="time_used">
       <Position>3</Position>
       <DataType>smallint(6)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="292" parent="282" name="scroe_rank">
+    <column id="295" parent="282" name="score">
       <Position>4</Position>
       <DataType>smallint(6)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <key id="293" parent="282" name="PRIMARY">
-      <NameSurrogate>1</NameSurrogate>
+    <index id="296" parent="282" name="speed_rank_player_name_uindex">
       <ColNames>player_name</ColNames>
+      <Unique>1</Unique>
+      <Type>btree</Type>
+    </index>
+    <key id="297" parent="282" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <ColNames>_id</ColNames>
       <Primary>1</Primary>
     </key>
-    <column id="294" parent="283" name="player_name">
+    <key id="298" parent="282" name="speed_rank_player_name_uindex">
+      <ColNames>player_name</ColNames>
+      <UnderlyingIndexName>speed_rank_player_name_uindex</UnderlyingIndexName>
+    </key>
+    <column id="299" parent="283" name="_id">
+      <Position>1</Position>
+      <DataType>smallint(6)|0s</DataType>
+      <NotNull>1</NotNull>
+      <SequenceIdentity>1</SequenceIdentity>
+      <ColumnKind>normal</ColumnKind>
+    </column>
+    <column id="300" parent="283" name="player_name">
+      <Position>2</Position>
+      <DataType>char(10)|0s</DataType>
+      <NotNull>1</NotNull>
+      <ColumnKind>normal</ColumnKind>
+    </column>
+    <column id="301" parent="283" name="total_score">
+      <Position>3</Position>
+      <DataType>smallint(6)|0s</DataType>
+      <ColumnKind>normal</ColumnKind>
+    </column>
+    <index id="302" parent="283" name="total_rank_player_name_uindex">
+      <ColNames>player_name</ColNames>
+      <Unique>1</Unique>
+      <Type>btree</Type>
+    </index>
+    <key id="303" parent="283" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <ColNames>_id</ColNames>
+      <Primary>1</Primary>
+    </key>
+    <key id="304" parent="283" name="total_rank_player_name_uindex">
+      <ColNames>player_name</ColNames>
+      <UnderlyingIndexName>total_rank_player_name_uindex</UnderlyingIndexName>
+    </key>
+    <column id="305" parent="284" name="first_name">
       <Position>1</Position>
       <DataType>char(10)|0s</DataType>
       <NotNull>1</NotNull>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="295" parent="283" name="total_score">
-      <Position>2</Position>
-      <DataType>smallint(6)|0s</DataType>
-      <ColumnKind>normal</ColumnKind>
-    </column>
-    <column id="296" parent="283" name="total_score_rank">
-      <Position>3</Position>
-      <DataType>smallint(6)|0s</DataType>
-      <ColumnKind>normal</ColumnKind>
-    </column>
-    <key id="297" parent="283" name="PRIMARY">
-      <NameSurrogate>1</NameSurrogate>
-      <ColNames>player_name</ColNames>
-      <Primary>1</Primary>
-    </key>
-    <column id="298" parent="284" name="first_name">
-      <Position>1</Position>
-      <DataType>char(10)|0s</DataType>
-      <NotNull>1</NotNull>
-      <ColumnKind>normal</ColumnKind>
-    </column>
-    <column id="299" parent="284" name="last_name">
+    <column id="306" parent="284" name="last_name">
       <Position>2</Position>
       <DataType>char(10)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="300" parent="284" name="age">
+    <column id="307" parent="284" name="age">
       <Position>3</Position>
       <DataType>smallint(6)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="301" parent="284" name="sex">
+    <column id="308" parent="284" name="sex">
       <Position>4</Position>
       <DataType>char(1)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="302" parent="284" name="income">
+    <column id="309" parent="284" name="income">
       <Position>5</Position>
       <DataType>float|0s</DataType>
       <ColumnKind>normal</ColumnKind>

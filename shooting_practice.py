@@ -53,7 +53,7 @@ def run_game():
     while True:
         # 检查事件
         func.check_events(settings, screen, stats, running_info, win_info, failed_info,
-                          gun, targets, bullets, text_box, notice_bars)
+                          gun, targets, bullets, text_box, notice_bars, mysql_helper)
         # 游戏进行中，更新枪支、子弹、靶机提示条、靶机位置
         if stats.game_state == GameState.RUNNING:
             gun.update()
