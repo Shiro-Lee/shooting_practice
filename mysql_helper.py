@@ -2,6 +2,7 @@ import pymysql
 
 
 class MySQLHelper:
+    """数据库连接类"""
     def __init__(self, host, user, pwd, db):
         self.host = host    # 数据库地址
         self.user = user    # 用户名

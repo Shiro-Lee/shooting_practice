@@ -126,12 +126,17 @@ def game_over(stats, targets, notice_bars):
     stats.new_timer()
 
 
-def game_finish(stats):
+def game_finish(stats, mysql_helper):
     """击破全部靶机，游戏胜利"""
     stats.game_state = GameState.GAME_FINISH
     pygame.mouse.set_visible(True)
     stats.stop_timer()
     stats.new_timer()
+    cal_score(stats)
+
+
+def cal_score(stats):
+    """计算得分"""
     # 剩余弹药分=剩余弹药数*100
     bullet_left_score = stats.bullet_left * 100
     # 耗时得分=(200-耗时)*50
@@ -153,7 +158,7 @@ def prep_new_round(settings, screen, targets, notice_bars):
 def fire_bullet(settings, screen, stats, running_info, gun, bullets):
     """如果还没有达到限制，就发射一颗子弹"""
     # 创建新子弹，并将其加入到编组bullets中
-    if len(bullets) < settings.bullets_allowed:
+    if len(bullets) < settings.bullets_allowed and stats.bullet_left > 0:
         fire_sound.play()
         stats.bullet_left -= 1
         running_info.prep_bullets()
@@ -161,7 +166,7 @@ def fire_bullet(settings, screen, stats, running_info, gun, bullets):
         bullets.add(new_bullet)
 
 
-def check_bullet_target_collisions(settings, screen, stats, gun, targets, bullets, notice_bars):
+def check_bullet_target_collisions(stats, targets, bullets):
     """响应子弹和靶机的碰撞"""
     collisions = pygame.sprite.groupcollide(bullets, targets, False, True)
     target_life = 0
@@ -186,10 +191,10 @@ def create_targets(settings, screen, stats, targets, target_list=tl):
         targets.add(target)
 
 
-def update_bullets(settings, screen, stats, gun, targets, bullets, notice_bars):
+def update_bullets(settings, screen, stats, targets, bullets, notice_bars, mysql_helper):
     """更新子弹位置，并删除已消失的子弹，同时判定游戏是否结束"""
     bullets.update()
-    check_bullet_target_collisions(settings, screen, stats, gun, targets, bullets, notice_bars)
+    check_bullet_target_collisions(stats, targets, bullets)
     for bullet in bullets.copy():
         if bullet.rect.left >= screen.get_rect().right:
             bullets.remove(bullet)
@@ -199,7 +204,7 @@ def update_bullets(settings, screen, stats, gun, targets, bullets, notice_bars):
                     return
             if not stats.target_left:
                 if stats.round == settings.max_round:   # 当前为最后一轮
-                    game_finish(stats)
+                    game_finish(stats, mysql_helper)
                 else:   # 进入下一轮
                     stats.round += 1
                     create_targets(settings, screen, stats, targets, tl)

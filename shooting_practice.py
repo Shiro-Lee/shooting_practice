@@ -9,6 +9,7 @@ from info_board import RunningInfo, WinInfo, FailedInfo
 from my_timer import MyTimer
 from text_box import TextBox
 from target import TargetSample
+from mysql_helper import MySQLHelper
 
 
 def run_game():
@@ -45,6 +46,9 @@ def run_game():
     # 创建输入框
     text_box = TextBox(screen, stats)
 
+    # 数据库连接
+    mysql_helper = MySQLHelper(host='localhost', user='root', pwd='241429', db='shooting_practice')
+
     # 开始游戏主循环
     while True:
         # 检查事件
@@ -53,7 +57,7 @@ def run_game():
         # 游戏进行中，更新枪支、子弹、靶机提示条、靶机位置
         if stats.game_state == GameState.RUNNING:
             gun.update()
-            func.update_bullets(settings, screen, stats, gun, targets, bullets, notice_bars)
+            func.update_bullets(settings, screen, stats, targets, bullets, notice_bars, mysql_helper)
             func.update_notice(notice_bars)
             func.update_targets(targets)
         # 更新屏幕

@@ -20,15 +20,12 @@ class Settings:
         # 枪支设置
         self.gun_speed = 1
 
-        # 子弹设置
+        # 子弹速度、发射上限设置
         self.bullet_speed = 10
-        self.bullet_width = 16
-        self.bullet_height = 4
-        self.bullet_color = (0, 0, 0)
         self.bullets_allowed = 1
 
         # 弹药数
-        self.bullet_limit = 1
+        self.bullet_limit = 100
 
         # 轮数
         self.max_round = len(target_list)

@@ -12,7 +12,7 @@ try:
     cursor.execute(sql)
     # 提交到数据库执行
     db.commit()
-except:
+except Exception:
     # 如果发生错误则回滚
     db.rollback()
 

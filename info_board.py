@@ -13,7 +13,7 @@ class RunningInfo:
         self.stats = stats
         self.timer = stats.overall_timer
 
-        self.bullet_image = pygame.image.load('images/bullet.png')
+        self.bullet_image = pygame.image.load('images/bullet_sample.png')
         self.bullet_rect = self.bullet_image.get_rect()
         self.bullet_rect.left, self.bullet_rect.top = self.settings.screen_width/15, settings.y_target_boundary
         self.timer_image, self.timer_rect = None, None
