@@ -8,9 +8,9 @@ random_attr = [(0.1, 0.2), (True, False), (0, 0.5)]
 target_list = [
     # 匀速靶
     [(0, False, 2, False, 0)],
-    # [(1, False, 2, False, 0)],
-    # [(2, False, 2, False, 0)],
-    # [(3, False, 2, False, 0)],
+    [(1, False, 2, False, 0)],
+    [(2, False, 2, False, 0)],
+    [(3, False, 2, False, 0)],
     # [(1, False, 2, False, 0), (2, False, 2, False, 1)],
     # [(2, False, 2, False, 0), (3, False, 2, False, 1)],
     # [(0, False, 2, False, 1), (3, False, 2, False, 0)],

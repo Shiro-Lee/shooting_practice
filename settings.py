@@ -25,7 +25,7 @@ class Settings:
         self.bullets_allowed = 1
 
         # 弹药数
-        self.bullet_limit = 100
+        self.bullet_limit = 1
 
         # 轮数
         self.max_round = len(target_list)

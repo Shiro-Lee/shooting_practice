@@ -5,9 +5,8 @@ from pygame.sprite import Group
 from gun import Gun
 from game_stats import GameStats, GameState
 from settings import Settings
-from info_board import RunningInfo, WinInfo, FailedInfo
+from info_board import PregameInfo, RunningInfo, WinInfo, FailedInfo
 from my_timer import MyTimer
-from text_box import TextBox
 from target import TargetSample
 from mysql_helper import MySQLHelper
 
@@ -44,16 +43,16 @@ def run_game():
     failed_info = FailedInfo(screen, stats)
 
     # 创建输入框
-    text_box = TextBox(screen, stats)
+    pregame_info = PregameInfo(screen, stats)
 
     # 数据库连接
     mysql_helper = MySQLHelper(host='localhost', user='root', pwd='241429', db='shooting_practice')
-
+    print(pygame.font.get_fonts())
     # 开始游戏主循环
     while True:
         # 检查事件
         func.check_events(settings, screen, stats, running_info, win_info, failed_info,
-                          gun, targets, bullets, text_box, notice_bars, mysql_helper)
+                          gun, targets, bullets, pregame_info, notice_bars, mysql_helper)
         # 游戏进行中，更新枪支、子弹、靶机提示条、靶机位置
         if stats.game_state == GameState.RUNNING:
             gun.update()
@@ -62,7 +61,7 @@ def run_game():
             func.update_targets(targets)
         # 更新屏幕
         func.update_screen(background, settings, screen, stats, running_info, win_info, failed_info, gun,
-                           target_sample, targets, bullets, notice_bars, text_box)
+                           target_sample, targets, bullets, notice_bars, pregame_info)
 
 
 run_game()

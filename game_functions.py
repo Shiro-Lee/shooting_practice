@@ -9,34 +9,28 @@ from music_and_sound import *
 
 
 def check_events(settings, screen, stats, running_info, win_info, failed_info,
-                 gun, targets, bullets, text_box, notice_bars, mysql_helper):
+                 gun, targets, bullets, pregame_info, notice_bars, mysql_helper):
     """处理事件"""
     for event in pygame.event.get():
         # 游戏未开始
         if stats.game_state == GameState.PREGAME:
                 check_pregame_events(event, settings, screen, stats, running_info,
-                                     gun, targets, bullets, text_box, notice_bars)
+                                     gun, targets, bullets, pregame_info, notice_bars)
         # 游戏进行中
         elif stats.game_state == GameState.RUNNING:
             check_running_events(event, settings, screen, stats, running_info, gun, bullets)
         # 游戏失败
-        elif stats.game_state == GameState.GAME_OVER:
-            if event.type == pygame.KEYDOWN:    # 按下按键
-                if event.key == pygame.K_RETURN:
-                    start_game(settings, screen, stats, running_info, gun, targets, bullets, notice_bars)
+        else:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
+                start_game(settings, screen, stats, running_info, gun, targets, bullets, notice_bars)
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mouse_x, mouse_y = pygame.mouse.get_pos()
-                check_restart_button(settings, screen, stats, running_info, failed_info,
-                                     gun, targets, bullets, mouse_x, mouse_y, notice_bars)
-        # 游戏胜利
-        elif stats.game_state == GameState.GAME_FINISH:
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RETURN:
-                    start_game(settings, screen, stats, running_info, gun, targets, bullets, notice_bars)
-            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                mouse_x, mouse_y = pygame.mouse.get_pos()
-                check_restart_button(settings, screen, stats, running_info, win_info,
-                                     gun, targets, bullets, mouse_x, mouse_y, notice_bars)
+                if stats.game_state == GameState.GAME_FINISH:
+                    check_restart_button(settings, screen, stats, running_info, win_info,
+                                         gun, targets, bullets, mouse_x, mouse_y, notice_bars)
+                elif stats.game_state == GameState.GAME_OVER:
+                    check_restart_button(settings, screen, stats, running_info, failed_info,
+                                         gun, targets, bullets, mouse_x, mouse_y, notice_bars)
         # 关闭窗口或按esc键时退出游戏
         if event.type == pygame.QUIT or event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
             stop_timers(stats, targets, notice_bars)
@@ -44,18 +38,18 @@ def check_events(settings, screen, stats, running_info, win_info, failed_info,
             sys.exit()
 
 
-def check_pregame_events(event, settings, screen, stats, running_info, gun, targets, bullets, text_box, notice_bars):
+def check_pregame_events(event, settings, screen, stats, running_info, gun, targets, bullets, pregame_info, notice_bars):
     if event.type == pygame.KEYDOWN:
-        if event.key == pygame.K_RETURN and text_box.text != '':  # 按下回车且输入玩家昵称不为空时开始游戏
-            stats.player_name = text_box.text
+        if event.key == pygame.K_RETURN and pregame_info.player_name != '':  # 按下回车且输入玩家昵称不为空时开始游戏
+            stats.player_name = pregame_info.player_name
             start_game(settings, screen, stats, running_info, gun, targets, bullets, notice_bars)
         else:  # 输入玩家名
-            text_box.key_down(event)
-            text_box.prep_text()
+            pregame_info.key_down(event)
+            pregame_info.prep_player_name()
     elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:  # 单击鼠标左键
         mouse_x, mouse_y = pygame.mouse.get_pos()
         check_play_button(settings, screen, stats, running_info, gun, targets, bullets,
-                          text_box, mouse_x, mouse_y, notice_bars)
+                          pregame_info, mouse_x, mouse_y, notice_bars)
 
 
 def check_running_events(event, settings, screen, stats, running_info, gun, bullets):
@@ -68,11 +62,11 @@ def check_running_events(event, settings, screen, stats, running_info, gun, bull
 
 
 def check_play_button(settings, screen, stats, running_info, gun, targets, bullets,
-                      text_box, mouse_x, mouse_y, notice_bars):
+                      pregame_info, mouse_x, mouse_y, notice_bars):
     """在玩家单击Play按钮时开始新游戏"""
-    button_clicked = text_box.play_button.rect.collidepoint(mouse_x, mouse_y)
-    if button_clicked and text_box.text != '':   # 开始按钮被点击且输入玩家昵称不为空时开始游戏
-        stats.player_name = text_box.text
+    button_clicked = pregame_info.play_button.rect.collidepoint(mouse_x, mouse_y)
+    if button_clicked and pregame_info.player_name != '':   # 开始按钮被点击且输入玩家昵称不为空时开始游戏
+        stats.player_name = pregame_info.player_name
         start_game(settings, screen, stats, running_info, gun, targets, bullets, notice_bars)
 
 
@@ -259,7 +253,7 @@ def draw_target_sample(settings, target_sample, screen):
 
 
 def update_screen(background, settings, screen, stats, running_info, win_info, failed_info, gun,
-                  target_sample, targets, bullets, notice_bars, text_box):
+                  target_sample, targets, bullets, notice_bars, pregame_info):
     """更新屏幕上的图像，并切换到新屏幕"""
     screen.blit(background, (0, 0))
     if stats.round != settings.max_round:
@@ -276,8 +270,8 @@ def update_screen(background, settings, screen, stats, running_info, win_info, f
 
     # 如果游戏处在非活动状态就绘制Play按钮
     if stats.game_state == GameState.PREGAME:
-        text_box.play_button.draw_button()
-        text_box.draw_text_box()
+        pregame_info.play_button.draw_button()
+        pregame_info.draw_pregame_info()
     elif stats.game_state == GameState.GAME_OVER:
         failed_info.show_info()
     elif stats.game_state == GameState.GAME_FINISH:
