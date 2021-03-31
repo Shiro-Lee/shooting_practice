@@ -9,7 +9,7 @@ class NoticeBar(Sprite):
         super().__init__()
         self.settings = settings
         self.screen = screen
-        self.rect = pygame.Rect(target.rect.left, target.rect.bottom, target.rect.width, 4)
+        self.rect = pygame.Rect(target.rect.left, target.rect.bottom, target.rect.width, 3)
         self.y = float(self.rect.y)
         self.color = (0, 0, 0)
         self.speed = 3

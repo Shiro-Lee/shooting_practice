@@ -38,7 +38,9 @@ def check_events(settings, screen, stats, running_info, win_info, failed_info,
             sys.exit()
 
 
-def check_pregame_events(event, settings, screen, stats, running_info, gun, targets, bullets, pregame_info, notice_bars):
+def check_pregame_events(event, settings, screen, stats, running_info,
+                         gun, targets, bullets, pregame_info, notice_bars):
+    """检查开始界面事件"""
     if event.type == pygame.KEYDOWN:
         if event.key == pygame.K_RETURN and pregame_info.player_name != '':  # 按下回车且输入玩家昵称不为空时开始游戏
             stats.player_name = pregame_info.player_name
@@ -53,10 +55,19 @@ def check_pregame_events(event, settings, screen, stats, running_info, gun, targ
 
 
 def check_running_events(event, settings, screen, stats, running_info, gun, bullets):
+    """检查游戏中事件"""
     if event.type == pygame.KEYDOWN:  # 按下按键
-        check_running_keydown_events(event, settings, screen, stats, running_info, gun, bullets)
+        if event.key == pygame.K_UP or event.key == pygame.K_w:  # 按上方向键或w键向上移动枪支
+            gun.moving_up = True
+        elif event.key == pygame.K_DOWN or event.key == pygame.K_s:  # 按下方向键或s键向下移动枪支
+            gun.moving_down = True
+        elif event.key == pygame.K_z:  # 按z键发射子弹
+            fire_bullet(settings, screen, stats, running_info, gun, bullets)
     elif event.type == pygame.KEYUP:  # 放开按键
-        check_running_keyup_events(event, gun)
+        if event.key == pygame.K_UP or event.key == pygame.K_w:
+            gun.moving_up = False
+        elif event.key == pygame.K_DOWN or event.key == pygame.K_s:
+            gun.moving_down = False
     elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:  # 单击发射子弹
         fire_bullet(settings, screen, stats, running_info, gun, bullets)
 
@@ -75,24 +86,6 @@ def check_restart_button(settings, screen, stats, running_info, info, gun, targe
     button_clicked = info.restart_button.rect.collidepoint(mouse_x, mouse_y)
     if button_clicked:
         start_game(settings, screen, stats, running_info, gun, targets, bullets, notice_bars)
-
-
-def check_running_keydown_events(event, settings, screen, stats, running_info, gun, bullets):
-    """响应按下按键"""
-    if event.key == pygame.K_UP or event.key == pygame.K_w:     # 按上方向键或w键向上移动枪支
-        gun.moving_up = True
-    elif event.key == pygame.K_DOWN or event.key == pygame.K_s:     # 按下方向键或s键向下移动枪支
-        gun.moving_down = True
-    elif event.key == pygame.K_z:   # 按z键发射子弹
-        fire_bullet(settings, screen, stats, running_info, gun, bullets)
-
-
-def check_running_keyup_events(event, gun):
-    """响应松开按键"""
-    if event.key == pygame.K_UP or event.key == pygame.K_w:
-        gun.moving_up = False
-    elif event.key == pygame.K_DOWN or event.key == pygame.K_s:
-        gun.moving_down = False
 
 
 def stop_timers(stats, targets, notice_bars):

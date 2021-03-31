@@ -1158,97 +1158,113 @@
       <ColNames>player_name</ColNames>
       <UnderlyingIndexName>bullet_rank_player_name_uindex</UnderlyingIndexName>
     </key>
-    <column id="292" parent="282" name="_id">
+    <foreign-key id="292" parent="281" name="bullet_total_player_name_fk">
+      <ColNames>player_name</ColNames>
+      <RefSchemaName>shooting_practice</RefSchemaName>
+      <RefTableName>total</RefTableName>
+      <RefColNames>player_name</RefColNames>
+      <OnUpdate>cascade</OnUpdate>
+      <OnDelete>cascade</OnDelete>
+    </foreign-key>
+    <column id="293" parent="282" name="_id">
       <Position>1</Position>
       <DataType>smallint(6)|0s</DataType>
       <NotNull>1</NotNull>
       <SequenceIdentity>1</SequenceIdentity>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="293" parent="282" name="player_name">
+    <column id="294" parent="282" name="player_name">
       <Position>2</Position>
       <DataType>char(10)|0s</DataType>
       <NotNull>1</NotNull>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="294" parent="282" name="time_used">
+    <column id="295" parent="282" name="time_used">
       <Position>3</Position>
       <DataType>smallint(6)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="295" parent="282" name="score">
+    <column id="296" parent="282" name="score">
       <Position>4</Position>
       <DataType>smallint(6)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <index id="296" parent="282" name="speed_rank_player_name_uindex">
+    <index id="297" parent="282" name="speed_rank_player_name_uindex">
       <ColNames>player_name</ColNames>
       <Unique>1</Unique>
       <Type>btree</Type>
     </index>
-    <key id="297" parent="282" name="PRIMARY">
+    <key id="298" parent="282" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <ColNames>_id</ColNames>
       <Primary>1</Primary>
     </key>
-    <key id="298" parent="282" name="speed_rank_player_name_uindex">
+    <key id="299" parent="282" name="speed_rank_player_name_uindex">
       <ColNames>player_name</ColNames>
       <UnderlyingIndexName>speed_rank_player_name_uindex</UnderlyingIndexName>
     </key>
-    <column id="299" parent="283" name="_id">
+    <foreign-key id="300" parent="282" name="speed_total_player_name_fk">
+      <ColNames>player_name</ColNames>
+      <RefSchemaName>shooting_practice</RefSchemaName>
+      <RefTableName>total</RefTableName>
+      <RefColNames>player_name</RefColNames>
+      <OnUpdate>cascade</OnUpdate>
+      <OnDelete>cascade</OnDelete>
+    </foreign-key>
+    <column id="301" parent="283" name="_id">
       <Position>1</Position>
       <DataType>smallint(6)|0s</DataType>
       <NotNull>1</NotNull>
       <SequenceIdentity>1</SequenceIdentity>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="300" parent="283" name="player_name">
+    <column id="302" parent="283" name="player_name">
       <Position>2</Position>
       <DataType>char(10)|0s</DataType>
       <NotNull>1</NotNull>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="301" parent="283" name="total_score">
+    <column id="303" parent="283" name="total_score">
       <Position>3</Position>
       <DataType>smallint(6)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <index id="302" parent="283" name="total_rank_player_name_uindex">
+    <index id="304" parent="283" name="total_rank_player_name_uindex">
       <ColNames>player_name</ColNames>
       <Unique>1</Unique>
       <Type>btree</Type>
     </index>
-    <key id="303" parent="283" name="PRIMARY">
+    <key id="305" parent="283" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <ColNames>_id</ColNames>
       <Primary>1</Primary>
     </key>
-    <key id="304" parent="283" name="total_rank_player_name_uindex">
+    <key id="306" parent="283" name="total_rank_player_name_uindex">
       <ColNames>player_name</ColNames>
       <UnderlyingIndexName>total_rank_player_name_uindex</UnderlyingIndexName>
     </key>
-    <column id="305" parent="284" name="first_name">
+    <column id="307" parent="284" name="first_name">
       <Position>1</Position>
       <DataType>char(10)|0s</DataType>
       <NotNull>1</NotNull>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="306" parent="284" name="last_name">
+    <column id="308" parent="284" name="last_name">
       <Position>2</Position>
       <DataType>char(10)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="307" parent="284" name="age">
+    <column id="309" parent="284" name="age">
       <Position>3</Position>
       <DataType>smallint(6)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="308" parent="284" name="sex">
+    <column id="310" parent="284" name="sex">
       <Position>4</Position>
       <DataType>char(1)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="309" parent="284" name="income">
+    <column id="311" parent="284" name="income">
       <Position>5</Position>
       <DataType>float|0s</DataType>
       <ColumnKind>normal</ColumnKind>
