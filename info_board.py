@@ -3,8 +3,7 @@ from button import Button
 
 
 class PregameInfo:
-    """玩家名输入框"""
-
+    """游戏开始界面"""
     def __init__(self, screen, stats):
         self.width, self.height = 300, 50
         self.text_color = (0, 0, 0)
@@ -13,7 +12,6 @@ class PregameInfo:
         self.stats = stats
         self.screen_rect = screen.get_rect()
         self.player_name_image, self.player_name_rect = None, None
-        self.length = 0
         self.max_length = 10    # 玩家id最长为10个字符
         # 创建文本框的rect对象，并使其居中
         self.player_name = ''
@@ -36,7 +34,7 @@ class PregameInfo:
         # 创建开始按钮，放在文本框下方
         self.play_button = Button(screen, '- Play -')
         self.play_button.rect.centerx = self.box_rect.centerx
-        self.play_button.rect.top = self.box_rect.bottom + 10
+        self.play_button.rect.top = self.box_rect.bottom + 20
         self.play_button.prep_msg()
         # 提示输入玩家名，放在文本框上方
         self.notice = 'Input your name:'
@@ -62,14 +60,11 @@ class PregameInfo:
 
     def key_down(self, event):
         """响应按键"""
-        key = event.key
-        if key == pygame.K_BACKSPACE:   # 退格键
+        if event.key == pygame.K_BACKSPACE and len(self.player_name) > 0:     # 退格键
             self.player_name = self.player_name[:-1]
-            self.length -= 1
         elif event.unicode != ' ':   # 输入除空格以外的字符
-            if self.length < self.max_length:
+            if len(self.player_name) < self.max_length:
                 char = event.unicode
-                self.length += 1
                 self.player_name += char
 
 
@@ -122,7 +117,6 @@ class RunningInfo:
 
 class WinInfo:
     """游戏胜利信息显示"""
-
     def __init__(self, settings, screen, stats):
         self.screen = screen
         self.stats = stats

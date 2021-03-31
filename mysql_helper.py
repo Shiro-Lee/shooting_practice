@@ -21,8 +21,20 @@ class MySQLHelper:
             self.state = False
             print('数据库连接异常：', e)
 
-    def query_all(self, sql):
+    def query_many(self, sql, num):
         """查询多条数据"""
+        cursor = self.conn.cursor(DictCursor)
+        try:
+            cursor.execute(sql)
+            data = cursor.fetchmany(num)
+            return data
+        except Exception as e:
+            print(e)
+        finally:
+            cursor.close()
+
+    def query_all(self, sql):
+        """查询全部数据"""
         cursor = self.conn.cursor(DictCursor)
         try:
             cursor.execute(sql)
