@@ -1,5 +1,6 @@
 import pygame
 from button import Button
+from sql_functions import *
 
 
 class PregameInfo:
@@ -7,7 +8,7 @@ class PregameInfo:
     def __init__(self, screen, stats):
         self.width, self.height = 300, 50
         self.text_color = (0, 0, 0)
-        self.bg_color = (255, 255, 255)
+        self.box_color = (255, 255, 255)
         self.screen = screen
         self.stats = stats
         self.screen_rect = screen.get_rect()
@@ -46,7 +47,7 @@ class PregameInfo:
 
     def prep_player_name(self):
         """将输入玩家名转化为图像"""
-        self.player_name_image = self.player_name_font.render(self.player_name, True, self.text_color, self.bg_color)
+        self.player_name_image = self.player_name_font.render(self.player_name, True, self.text_color, self.box_color)
         self.player_name_rect = self.player_name_image.get_rect()
         self.player_name_rect.center = self.box_rect.center
 
@@ -55,8 +56,9 @@ class PregameInfo:
         self.screen.blit(self.logo_image, self.logo_rect)
         self.screen.blit(self.title_image, self.title_rect)
         self.screen.blit(self.notice_image, self.notice_rect)
-        self.screen.fill(self.bg_color, self.box_rect)
+        self.screen.fill(self.box_color, self.box_rect)
         self.screen.blit(self.player_name_image, self.player_name_rect)
+        self.play_button.draw_button()
 
     def key_down(self, event):
         """响应按键"""
@@ -134,8 +136,13 @@ class WinInfo:
         # 重新开始按钮
         self.restart_button = Button(screen, '- Restart -')
         self.restart_button.rect.centerx = self.win_rect.centerx
-        self.restart_button.rect.bottom = self.screen.get_rect().bottom - settings.y_target_boundary
+        self.restart_button.rect.bottom = self.screen_rect.bottom - settings.y_target_boundary
         self.restart_button.prep_msg()
+        # 显示各项得分排行按钮
+        self.show_tops_button = Button(screen, '- Show Top10 -')
+        self.show_tops_button.rect.centerx = self.win_rect.centerx
+        self.show_tops_button.rect.bottom = self.restart_button.rect.top - 20
+        self.show_tops_button.prep_msg()
 
     def prep_score(self):
         # 剩余弹药得分
@@ -163,6 +170,7 @@ class WinInfo:
         self.screen.blit(self.time_used_info_image, self.time_used_info_rect)
         self.screen.blit(self.total_score_info_image, self.total_score_rect)
         self.restart_button.draw_button()
+        self.show_tops_button.draw_button()
 
 
 class FailedInfo:
@@ -186,3 +194,62 @@ class FailedInfo:
     def show_info(self):
         self.screen.blit(self.failed_image, self.failed_rect)
         self.restart_button.draw_button()
+
+
+class Top10Info:
+    def __init__(self, settings, screen, mysql_helper):
+        self.settings = settings
+        self.screen = screen
+        self.mysql_helper = mysql_helper
+        self.title_font = pygame.font.SysFont('华文琥珀', 60)
+        self.text_color = (0, 0, 0)
+
+
+class BulletTop10(Top10Info):
+    """玩家名 剩余弹药数 剩余弹药得分 排名"""
+    """1/5 2/5 3/5 4/5"""
+    def __init__(self, settings, screen, mysql_helper):
+        super().__init__(settings, screen, mysql_helper)
+        self.title = 'Bullet Left Top 10'
+        self.results = get_top10_bullet(mysql_helper)
+        self.columns = ['Player Name', 'Bullet Left', 'Score', 'Rank']
+        self.images = []
+        self.rects = []
+        self.positions = []
+        for i in range(1, 5):
+            self.positions.append((self.settings.screen_width/5*i, 50))
+        for column_num in range(4):
+            column_image = self.title_font.render(self.columns[column_num], True, self.text_color)
+            self.images.append(column_image)
+            rect = column_image.get_rect()
+            rect.centerx = self.positions[column_num][0]
+            rect.centery = self.positions[column_num][1]
+            self.rects.append(rect)
+
+    def show_rank(self):
+        for i in range(4):
+            self.screen.blit(self.images[i], self.rects[i])
+
+
+class TimeTop10(Top10Info):
+    """玩家名 耗时 耗时得分 排名"""
+    """1/5 2/5 3/5 4/5"""
+    def __init__(self, settings, screen, mysql_helper):
+        super().__init__(settings, screen, mysql_helper)
+        self.title = 'Time Used Top 10'
+        self.results = get_top10_speed(mysql_helper)
+
+    def show_rank(self):
+        pass
+
+
+class TotalTop10(Top10Info):
+    """玩家名 剩余弹药得分 耗时得分 总分 排名"""
+    """1/10 3/10 5/10 7/10 9/10"""
+    def __init__(self, settings, screen, mysql_helper):
+        super().__init__(settings, screen, mysql_helper)
+        self.title = 'Total Top 10'
+        self.results = get_top10_total(mysql_helper)
+
+    def show_rank(self):
+        pass

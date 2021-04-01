@@ -1176,7 +1176,7 @@
     </column>
     <column id="293" parent="281" name="time_used">
       <Position>3</Position>
-      <DataType>smallint(6)|0s</DataType>
+      <DataType>float|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
     <column id="294" parent="281" name="score">

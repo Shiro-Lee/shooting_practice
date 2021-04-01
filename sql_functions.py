@@ -58,7 +58,7 @@ def insert_result(stats, mysql_helper):
 
 
 def get_top10_bullet(mysql_helper):
-    # 获取剩余弹药得分前十名
+    """获取剩余弹药得分前十名"""
     sql = "SET @cur_rank:=0, @pre_rank:=NULL, @inc_rank:=1;"
     mysql_helper.execute(sql)
     sql = "SELECT player_name, bullet_left, score, " \
@@ -74,7 +74,7 @@ def get_top10_bullet(mysql_helper):
 
 
 def get_top10_speed(mysql_helper):
-    # 获取耗时得分前十名
+    """获取耗时得分前十名"""
     sql = "SET @cur_rank:=0, @pre_rank:=NULL, @inc_rank:=1;"
     mysql_helper.execute(sql)
     sql = "SELECT player_name, time_used, score, " \
@@ -90,7 +90,7 @@ def get_top10_speed(mysql_helper):
 
 
 def get_top10_total(mysql_helper):
-    # 获取总得分前十名
+    """获取总得分前十名"""
     sql = "SET @cur_rank:=0, @pre_rank:=NULL, @inc_rank:=1;"
     mysql_helper.execute(sql)
     sql = "SELECT player_name, total_score, " \

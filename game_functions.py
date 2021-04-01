@@ -132,7 +132,7 @@ def game_over(stats, targets, notice_bars):
     stats.new_timer()
 
 
-def game_finish(stats, mysql_helper):
+def game_finish(stats, win_info, mysql_helper):
     """击破全部靶机，游戏胜利"""
     stats.game_state = GameState.GAME_FINISH
     pygame.mouse.set_visible(True)
@@ -140,6 +140,7 @@ def game_finish(stats, mysql_helper):
     stats.stop_timer()
     stats.new_timer()
     cal_score(stats)
+    win_info.prep_score()
     sf.check_player(stats, mysql_helper)
 
 
@@ -199,7 +200,7 @@ def create_targets(settings, screen, stats, targets, target_list=tl):
         targets.add(target)
 
 
-def update_bullets(settings, screen, stats, targets, bullets, notice_bars, mysql_helper):
+def update_bullets(settings, screen, stats, targets, bullets, notice_bars, win_info, mysql_helper):
     """更新子弹位置，并删除已消失的子弹，同时判定游戏是否结束"""
     bullets.update()
     check_bullet_target_collisions(stats, targets, bullets)
@@ -212,7 +213,7 @@ def update_bullets(settings, screen, stats, targets, bullets, notice_bars, mysql
                     return
             if not stats.target_left:
                 if stats.round == settings.max_round:   # 当前为最后一轮
-                    game_finish(stats, mysql_helper)
+                    game_finish(stats, win_info, mysql_helper)
                 else:   # 进入下一轮
                     stats.round += 1
                     create_targets(settings, screen, stats, targets, tl)
@@ -245,8 +246,7 @@ def draw_target_sample(settings, target_sample, screen):
         screen.blit(target_sample.image, [x+i*target_width*2, y])
 
 
-def update_screen(background, settings, screen, stats, running_info, win_info, failed_info, gun,
-                  target_sample, targets, bullets, notice_bars, pregame_info):
+def common_update_screen(background, settings, screen, stats, running_info, gun, target_sample, targets, bullets, notice_bars):
     """更新屏幕上的图像，并切换到新屏幕"""
     screen.blit(background, (0, 0))
     if stats.round != settings.max_round:
@@ -260,16 +260,3 @@ def update_screen(background, settings, screen, stats, running_info, win_info, f
     if stats.overall_timer.time_change:
         running_info.prep_timer()
     running_info.show_info()
-
-    # 如果游戏处在非活动状态就绘制Play按钮
-    if stats.game_state == GameState.PREGAME:
-        pregame_info.play_button.draw_button()
-        pregame_info.draw_pregame_info()
-    elif stats.game_state == GameState.GAME_OVER:
-        failed_info.show_info()
-    elif stats.game_state == GameState.GAME_FINISH:
-        win_info.prep_score()
-        win_info.show_info()
-
-    # 让最近绘制的屏幕可见
-    pygame.display.flip()

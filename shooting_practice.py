@@ -53,15 +53,23 @@ def run_game():
         # 检查事件
         func.check_events(settings, screen, stats, running_info, win_info, failed_info,
                           gun, targets, bullets, pregame_info, notice_bars, mysql_helper)
+        # 更新屏幕
+        func.common_update_screen(background, settings, screen, stats, running_info, gun,
+                                  target_sample, targets, bullets, notice_bars)
         # 游戏进行中，更新枪支、子弹、靶机提示条、靶机位置
         if stats.game_state == GameState.RUNNING:
             gun.update()
-            func.update_bullets(settings, screen, stats, targets, bullets, notice_bars, mysql_helper)
+            func.update_bullets(settings, screen, stats, targets, bullets, notice_bars, win_info, mysql_helper)
             func.update_notice(notice_bars)
             func.update_targets(targets)
-        # 更新屏幕
-        func.update_screen(background, settings, screen, stats, running_info, win_info, failed_info, gun,
-                           target_sample, targets, bullets, notice_bars, pregame_info)
+        elif stats.game_state == GameState.PREGAME:
+            pregame_info.draw_pregame_info()
+        elif stats.game_state == GameState.GAME_OVER:
+            failed_info.show_info()
+        elif stats.game_state == GameState.GAME_FINISH:
+            win_info.show_info()
+        # 让最近绘制的屏幕可见
+        pygame.display.flip()
 
 
 run_game()
