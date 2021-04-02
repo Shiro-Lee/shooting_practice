@@ -7,7 +7,6 @@ class GameState(Enum):
     RUNNING = 1     # 游戏进行中
     GAME_OVER = 2   # 游戏失败
     GAME_FINISH = 3     # 游戏正常结束
-    SHOW_TOPS = 4   # 显示得分排行榜
 
 
 class GameStats:

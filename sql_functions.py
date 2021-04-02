@@ -57,7 +57,7 @@ def insert_result(stats, mysql_helper):
     mysql_helper.execute(sql)
 
 
-def get_top10_bullet(mysql_helper):
+def get_bullet_top10(mysql_helper):
     """获取剩余弹药得分前十名"""
     sql = "SET @cur_rank:=0, @pre_rank:=NULL, @inc_rank:=1;"
     mysql_helper.execute(sql)
@@ -66,40 +66,50 @@ def get_top10_bullet(mysql_helper):
           "@inc_rank:= @inc_rank+1, " \
           "@pre_rank:= score " \
           "FROM bullet " \
-          "ORDER BY score"
+          "ORDER BY score DESC "
     results = mysql_helper.query_many(sql, 10)
-    for result in results:
-        print(result)
+    cut_results(results)
     return results
 
 
-def get_top10_speed(mysql_helper):
+def get_speed_top10(mysql_helper):
     """获取耗时得分前十名"""
     sql = "SET @cur_rank:=0, @pre_rank:=NULL, @inc_rank:=1;"
     mysql_helper.execute(sql)
-    sql = "SELECT player_name, time_used, score, " \
+    sql = "SELECT player_name, ROUND(time_used, 2), score, " \
           "@cur_rank:= IF(@pre_rank=score, @cur_rank, @inc_rank) AS 'rank', " \
           "@inc_rank:= @inc_rank+1, " \
           "@pre_rank:= score " \
           "FROM speed " \
-          "ORDER BY score"
+          "ORDER BY score DESC "
     results = mysql_helper.query_many(sql, 10)
-    for result in results:
-        print(result)
+    cut_results(results)
     return results
 
 
-def get_top10_total(mysql_helper):
+def get_total_top10(mysql_helper):
     """获取总得分前十名"""
     sql = "SET @cur_rank:=0, @pre_rank:=NULL, @inc_rank:=1;"
     mysql_helper.execute(sql)
-    sql = "SELECT player_name, total_score, " \
+    sql = "SELECT total.player_name, bullet.score, speed.score, total.total_score, " \
           "@cur_rank:= IF(@pre_rank=total_score, @cur_rank, @inc_rank) AS 'rank', " \
           "@inc_rank:= @inc_rank+1, " \
           "@pre_rank:= total_score " \
-          "FROM total " \
-          "ORDER BY total_score"
+          "FROM total, bullet, speed " \
+          "WHERE total.player_name=bullet.player_name AND total.player_name=speed.player_name " \
+          "ORDER BY total.total_score DESC "
     results = mysql_helper.query_many(sql, 10)
-    for result in results:
-        print(result)
+    cut_total_results(results)
     return results
+
+
+def cut_results(results):
+    for result in results:
+        del result['@pre_rank:= score']
+        del result['@inc_rank:= @inc_rank+1']
+
+
+def cut_total_results(results):
+    for result in results:
+        del result['@pre_rank:= total_score']
+        del result['@inc_rank:= @inc_rank+1']

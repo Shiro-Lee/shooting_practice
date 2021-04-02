@@ -36,18 +36,18 @@ def run_game():
     targets = Group()
     notice_bars = Group()
 
+    # 数据库连接
+    mysql_helper = MySQLHelper(host='localhost', user='root', pwd='241429', db='shooting_practice')
+
     # 创建用于存储游戏统计信息的实例，并创建信息显示板
     stats = GameStats(settings, overall_timer)
     running_info = RunningInfo(settings, screen, stats)
-    win_info = WinInfo(settings, screen, stats)
+    win_info = WinInfo(settings, screen, stats, mysql_helper)
     failed_info = FailedInfo(screen, stats)
 
     # 创建输入框
     pregame_info = PregameInfo(screen, stats)
 
-    # 数据库连接
-    mysql_helper = MySQLHelper(host='localhost', user='root', pwd='241429', db='shooting_practice')
-    
     # 开始游戏主循环
     while True:
         # 检查事件

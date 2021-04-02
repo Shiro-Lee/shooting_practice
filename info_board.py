@@ -1,6 +1,15 @@
 import pygame
 from button import Button
 from sql_functions import *
+from enum import Enum
+
+
+class RankState(Enum):
+    """枚举游戏状态"""
+    WIN_INFO = 0
+    BULLET_TOP10 = 1    # 显示剩余弹药排名
+    SPEED_TOP10 = 2     # 显示耗时排名
+    TOTAL_TOP10 = 3     # 显示总分排名
 
 
 class PregameInfo:
@@ -119,58 +128,179 @@ class RunningInfo:
 
 class WinInfo:
     """游戏胜利信息显示"""
-    def __init__(self, settings, screen, stats):
+
+    def __init__(self, settings, screen, stats, mysql_helper):
+        self.settings = settings
         self.screen = screen
         self.stats = stats
+        self.mysql_helper = mysql_helper
+
+        self.rank_state = RankState.WIN_INFO
         self.screen_rect = screen.get_rect()
         self.win_font = pygame.font.SysFont('华文琥珀', 60)
-        self.stats_font = pygame.font.SysFont('黑体', 36)
+        self.results_font = pygame.font.SysFont('方正姚体', 32)
+        self.column_font = pygame.font.SysFont('方正姚体', 36)
         self.text_color = (0, 0, 0)
-        self.bullet_left_info, self.bullet_left_info_image, self.bullet_left_info_rect = None, None, None
-        self.time_used_info, self.time_used_info_image, self.time_used_info_rect = None, None, None
-        self.total_score_info, self.total_score_info_image, self.total_score_rect = None, None, None
+        self.bullet_left, self.bullet_left_image, self.bullet_left_rect = None, None, None
+        self.time_used, self.time_used_image, self.time_used_rect = None, None, None
+        self.total_score, self.total_score_image, self.total_score_rect = None, None, None
+
+        # 排行榜标题
+        self.rank_title = ''
+        self.rank_title_image, self.rank_title_rect = None, None
+        self.columns = None
+        self.column_images = []
+        self.column_rects = []
+        self.results = None
+        self.result_images = []
+        self.result_rects = []
+
         # 游戏胜利提示
         self.win_image = self.win_font.render('YOU WIN', True, self.text_color)
         self.win_rect = self.win_image.get_rect()
         self.win_rect.centerx, self.win_rect.bottom = self.screen_rect.centerx, self.screen_rect.centery
+
         # 重新开始按钮
         self.restart_button = Button(screen, '- Restart -')
         self.restart_button.rect.centerx = self.win_rect.centerx
         self.restart_button.rect.bottom = self.screen_rect.bottom - settings.y_target_boundary
         self.restart_button.prep_msg()
+
         # 显示各项得分排行按钮
-        self.show_tops_button = Button(screen, '- Show Top10 -')
+        self.show_tops_button = Button(screen, '- Show Top 10 -')
         self.show_tops_button.rect.centerx = self.win_rect.centerx
-        self.show_tops_button.rect.bottom = self.restart_button.rect.top - 20
+        self.show_tops_button.rect.bottom = self.restart_button.rect.top - 10
         self.show_tops_button.prep_msg()
 
     def prep_score(self):
         # 剩余弹药得分
-        self.bullet_left_info = 'Bullet Left Score: ' + str(self.stats.bullet_left_score)
-        self.bullet_left_info_image = self.stats_font.render(self.bullet_left_info, True, self.text_color)
-        self.bullet_left_info_rect = self.bullet_left_info_image.get_rect()
-        self.bullet_left_info_rect.centerx = self.win_rect.centerx
-        self.bullet_left_info_rect.top = self.win_rect.bottom + 10
+        self.bullet_left = 'Bullet Left Score: ' + str(self.stats.bullet_left_score)
+        self.bullet_left_image = self.results_font.render(self.bullet_left, True, self.text_color)
+        self.bullet_left_rect = self.bullet_left_image.get_rect()
+        self.bullet_left_rect.centerx = self.win_rect.centerx
+        self.bullet_left_rect.top = self.win_rect.bottom + 10
         # 耗时得分
-        self.time_used_info = 'Time Used Score: ' + str(self.stats.time_used_score)
-        self.time_used_info_image = self.stats_font.render(self.time_used_info, True, self.text_color)
-        self.time_used_info_rect = self.time_used_info_image.get_rect()
-        self.time_used_info_rect.centerx = self.win_rect.centerx
-        self.time_used_info_rect.top = self.bullet_left_info_rect.bottom
+        self.time_used = 'Time Used Score: ' + str(self.stats.time_used_score)
+        self.time_used_image = self.results_font.render(self.time_used, True, self.text_color)
+        self.time_used_rect = self.time_used_image.get_rect()
+        self.time_used_rect.centerx = self.win_rect.centerx
+        self.time_used_rect.top = self.bullet_left_rect.bottom
         # 总分
-        self.total_score_info = 'Total Score: ' + str(self.stats.total_score)
-        self.total_score_info_image = self.stats_font.render(self.total_score_info, True, self.text_color)
-        self.total_score_rect = self.total_score_info_image.get_rect()
+        self.total_score = 'Total Score: ' + str(self.stats.total_score)
+        self.total_score_image = self.results_font.render(self.total_score, True, self.text_color)
+        self.total_score_rect = self.total_score_image.get_rect()
         self.total_score_rect.centerx = self.win_rect.centerx
-        self.total_score_rect.top = self.time_used_info_rect.bottom
+        self.total_score_rect.top = self.time_used_rect.bottom
+
+    def prep_title(self):
+        self.rank_title_image = self.win_font.render(self.rank_title, True, self.text_color)
+        self.rank_title_rect = self.rank_title_image.get_rect()
+        self.rank_title_rect.centerx = self.screen.get_rect().centerx
+        self.rank_title_rect.top = self.settings.y_target_boundary
 
     def show_info(self):
-        self.screen.blit(self.win_image, self.win_rect)
-        self.screen.blit(self.bullet_left_info_image, self.bullet_left_info_rect)
-        self.screen.blit(self.time_used_info_image, self.time_used_info_rect)
-        self.screen.blit(self.total_score_info_image, self.total_score_rect)
+        if self.rank_state == RankState.WIN_INFO:
+            self.screen.blit(self.win_image, self.win_rect)
+            self.screen.blit(self.bullet_left_image, self.bullet_left_rect)
+            self.screen.blit(self.time_used_image, self.time_used_rect)
+            self.screen.blit(self.total_score_image, self.total_score_rect)
+        else:
+            self.screen.blit(self.rank_title_image, self.rank_title_rect)
+            # 显示列名
+            for image, rect in zip(self.column_images, self.column_rects):
+                self.screen.blit(image, rect)
+            for image, rect in zip(self.result_images, self.result_rects):
+                self.screen.blit(image, rect)
         self.restart_button.draw_button()
         self.show_tops_button.draw_button()
+
+    def switch_top10(self):
+        """切换显示排行榜"""
+        self.result_images.clear()
+        self.result_rects.clear()
+        if self.rank_state == RankState.WIN_INFO:
+            self.prep_button_msg('- Switch Top10 -')
+            self.prep_bullet_rank()
+        elif self.rank_state == RankState.TOTAL_TOP10:
+            self.prep_bullet_rank()
+        elif self.rank_state == RankState.BULLET_TOP10:
+            self.prep_speed_rank()
+        elif self.rank_state == RankState.SPEED_TOP10:
+            self.prep_total_rank()
+        self.prep_title()
+        self.prep_columns(self.columns)
+        self.show_tops_button.prep_msg()
+
+    def prep_button_msg(self, msg):
+        """更新排行显示切换按钮"""
+        self.show_tops_button.msg = msg
+        self.show_tops_button.prep_msg()
+        self.show_tops_button.rect.centerx = self.win_rect.centerx
+
+    def prep_bullet_rank(self):
+        """玩家名 剩余弹药数 剩余弹药得分 排名"""
+        """1/5 2/5 3/5 4/5"""
+        self.rank_state = RankState.BULLET_TOP10
+        self.rank_title = 'Bullet Left Top10'
+        self.columns = ['Player', 'Bullet Left', 'Score', 'Rank']
+        self.results = get_bullet_top10(self.mysql_helper)
+        self.prep_rank()
+
+    def prep_speed_rank(self):
+        """玩家名 耗时 耗时得分 排名"""
+        """1/5 2/5 3/5 4/5"""
+        self.rank_state = RankState.SPEED_TOP10
+        self.columns = ['Player', 'Time Used', 'Score', 'Rank']
+        self.rank_title = 'Time Used Top10'
+        self.results = get_speed_top10(self.mysql_helper)
+        self.prep_rank()
+
+    def prep_total_rank(self):
+        """玩家名 剩余弹药得分 耗时得分 总分 排名"""
+        """1/10 3/10 5/10 7/10 9/10"""
+        self.rank_state = RankState.TOTAL_TOP10
+        self.columns = ['Player', 'Bullet Left Score', 'Time Used Score', 'Total Score', 'Total Rank']
+        self.rank_title = 'Total Top10'
+        self.results = get_total_top10(self.mysql_helper)
+        self.prep_rank()
+
+    def prep_rank(self):
+        """准备排行榜数据"""
+        interval_x = self.settings.screen_width * 0.2
+        interval_y = 35
+        start_x = self.settings.screen_width * 0.2 if len(self.columns) == 4 else self.settings.screen_width * 0.1
+        start_y = 200
+        i, j = 0, 0
+        for result in self.results:
+            i = 0
+            centery = start_y + j * interval_y
+            for value in result.values():
+                result_image = self.results_font.render(str(value), True, self.text_color)
+                result_rect = result_image.get_rect()
+                result_rect.centerx = start_x + i * interval_x
+                result_rect.centery = centery
+                self.result_images.append(result_image)
+                self.result_rects.append(result_rect)
+                i += 1
+                self.result_images.append(result_image)
+                self.result_rects.append(result_rect)
+            j += 1
+
+    def prep_columns(self, columns):
+        """准备列名"""
+        interval_x = self.settings.screen_width * 0.2
+        start_x = self.settings.screen_width * 0.2 if len(columns) == 4 else self.settings.screen_width * 0.1
+        self.column_images.clear()
+        self.column_rects.clear()
+        i = 0
+        for column in columns:
+            column_image = self.column_font.render(column, True, self.text_color)
+            column_rect = column_image.get_rect()
+            column_rect.centery = 150
+            column_rect.centerx = start_x + i * interval_x
+            i += 1
+            self.column_images.append(column_image)
+            self.column_rects.append(column_rect)
 
 
 class FailedInfo:
@@ -202,54 +332,7 @@ class Top10Info:
         self.screen = screen
         self.mysql_helper = mysql_helper
         self.title_font = pygame.font.SysFont('华文琥珀', 60)
+        self.data_font = pygame.font.SysFont('方正姚体', 24)
         self.text_color = (0, 0, 0)
-
-
-class BulletTop10(Top10Info):
-    """玩家名 剩余弹药数 剩余弹药得分 排名"""
-    """1/5 2/5 3/5 4/5"""
-    def __init__(self, settings, screen, mysql_helper):
-        super().__init__(settings, screen, mysql_helper)
-        self.title = 'Bullet Left Top 10'
-        self.results = get_top10_bullet(mysql_helper)
-        self.columns = ['Player Name', 'Bullet Left', 'Score', 'Rank']
-        self.images = []
-        self.rects = []
-        self.positions = []
-        for i in range(1, 5):
-            self.positions.append((self.settings.screen_width/5*i, 50))
-        for column_num in range(4):
-            column_image = self.title_font.render(self.columns[column_num], True, self.text_color)
-            self.images.append(column_image)
-            rect = column_image.get_rect()
-            rect.centerx = self.positions[column_num][0]
-            rect.centery = self.positions[column_num][1]
-            self.rects.append(rect)
-
-    def show_rank(self):
-        for i in range(4):
-            self.screen.blit(self.images[i], self.rects[i])
-
-
-class TimeTop10(Top10Info):
-    """玩家名 耗时 耗时得分 排名"""
-    """1/5 2/5 3/5 4/5"""
-    def __init__(self, settings, screen, mysql_helper):
-        super().__init__(settings, screen, mysql_helper)
-        self.title = 'Time Used Top 10'
-        self.results = get_top10_speed(mysql_helper)
-
-    def show_rank(self):
-        pass
-
-
-class TotalTop10(Top10Info):
-    """玩家名 剩余弹药得分 耗时得分 总分 排名"""
-    """1/10 3/10 5/10 7/10 9/10"""
-    def __init__(self, settings, screen, mysql_helper):
-        super().__init__(settings, screen, mysql_helper)
-        self.title = 'Total Top 10'
-        self.results = get_top10_total(mysql_helper)
-
-    def show_rank(self):
-        pass
+        self.title = ''
+        self.title_image, self.title_rect = None, None

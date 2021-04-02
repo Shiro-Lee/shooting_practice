@@ -6,6 +6,7 @@ from target import UniformTarget, AccelerateTarget
 from notice_bar import NoticeBar
 from target_list import target_list as tl
 from music_and_sound import *
+from info_board import RankState
 
 
 def check_events(settings, screen, stats, running_info, win_info, failed_info,
@@ -14,20 +15,24 @@ def check_events(settings, screen, stats, running_info, win_info, failed_info,
     for event in pygame.event.get():
         # 游戏未开始
         if stats.game_state == GameState.PREGAME:
-                check_pregame_events(event, settings, screen, stats, running_info,
+            check_pregame_events(event, settings, screen, stats, running_info,
                                      gun, targets, bullets, pregame_info, notice_bars)
         # 游戏进行中
         elif stats.game_state == GameState.RUNNING:
             check_running_events(event, settings, screen, stats, running_info, gun, bullets)
-        # 游戏失败
+        # 游戏完成或失败
         else:
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
-                start_game(settings, screen, stats, running_info, gun, targets, bullets, notice_bars)
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:
+                    start_game(settings, screen, stats, running_info, gun, targets, bullets, notice_bars)
+                elif event.key == pygame.K_SPACE:
+                    win_info.switch_top10()
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mouse_x, mouse_y = pygame.mouse.get_pos()
                 if stats.game_state == GameState.GAME_FINISH:
                     check_restart_button(settings, screen, stats, running_info, win_info,
                                          gun, targets, bullets, mouse_x, mouse_y, notice_bars)
+                    check_show_tops_button(win_info, mouse_x, mouse_y)
                 elif stats.game_state == GameState.GAME_OVER:
                     check_restart_button(settings, screen, stats, running_info, failed_info,
                                          gun, targets, bullets, mouse_x, mouse_y, notice_bars)
@@ -135,6 +140,8 @@ def game_over(stats, targets, notice_bars):
 def game_finish(stats, win_info, mysql_helper):
     """击破全部靶机，游戏胜利"""
     stats.game_state = GameState.GAME_FINISH
+    win_info.rank_state = RankState.WIN_INFO
+    win_info.prep_button_msg('- Show Top10 -')
     pygame.mouse.set_visible(True)
     stats.time_used = stats.overall_timer.pass_time
     stats.stop_timer()
@@ -200,6 +207,12 @@ def create_targets(settings, screen, stats, targets, target_list=tl):
         targets.add(target)
 
 
+def check_show_tops_button(win_info, mouse_x, mouse_y):
+    button_clicked = win_info.show_tops_button.rect.collidepoint(mouse_x, mouse_y)
+    if button_clicked:
+        win_info.switch_top10()
+
+
 def update_bullets(settings, screen, stats, targets, bullets, notice_bars, win_info, mysql_helper):
     """更新子弹位置，并删除已消失的子弹，同时判定游戏是否结束"""
     bullets.update()
@@ -246,7 +259,8 @@ def draw_target_sample(settings, target_sample, screen):
         screen.blit(target_sample.image, [x+i*target_width*2, y])
 
 
-def common_update_screen(background, settings, screen, stats, running_info, gun, target_sample, targets, bullets, notice_bars):
+def common_update_screen(background, settings, screen, stats, running_info,
+                         gun, target_sample, targets, bullets, notice_bars):
     """更新屏幕上的图像，并切换到新屏幕"""
     screen.blit(background, (0, 0))
     if stats.round != settings.max_round:
