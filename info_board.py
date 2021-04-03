@@ -1,6 +1,7 @@
 import pygame
 from button import Button
 from sql_functions import *
+from io_functions import *
 from enum import Enum
 from pygame import gfxdraw
 
@@ -201,6 +202,7 @@ class WinInfo:
         self.rank_title_rect.top = self.settings.y_target_boundary
 
     def show_info(self):
+        """显示得分/排行榜"""
         if self.rank_state == RankState.WIN_INFO:
             self.screen.blit(self.win_image, self.win_rect)
             self.screen.blit(self.bullet_left_image, self.bullet_left_rect)
@@ -247,12 +249,13 @@ class WinInfo:
         self.columns = ['Player', 'Bullet Left', 'Score', 'Rank']
         self.rank_bg_rect.width = 0.8 * self.settings.screen_width
         self.rank_bg_rect.centerx = self.screen_rect.centerx
+
         self.results = get_bullet_top10(self.mysql_helper)
+
         self.prep_rank()
 
     def prep_speed_rank(self):
         """玩家名 耗时 耗时得分 排名"""
-        """1/5 2/5 3/5 4/5"""
         self.rank_state = RankState.SPEED_TOP10
         self.rank_title = 'Time Used Top10'
         self.columns = ['Player', 'Time Used', 'Score', 'Rank']
