@@ -79,7 +79,6 @@ class PregameInfo:
             if len(self.player_name) < self.max_length:
                 char = event.unicode
                 self.player_name += char
-        print(len(self.player_name))
 
 
 class RunningInfo:

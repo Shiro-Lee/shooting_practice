@@ -1,13 +1,3 @@
-"""
-查找是否已存在玩家名
-    是→是否为最高分
-        是→更新最高分
-        否→pass
-    否→插入玩家成绩
-↓
-获取前10名信息
-"""
-
 
 def check_player(stats, mysql_helper):
     sql = "SELECT * FROM total WHERE player_name='%s'" % stats.player_name
@@ -37,15 +27,17 @@ def check_higher_score(stats, mysql_helper):
     sql = "SELECT total_score FROM total WHERE player_name='%s'" % stats.player_name
     result = mysql_helper.query_one(sql)
     if stats.total_score > int(result['total_score']):
-        sql = "UPDATE total SET total_score='%s' WHERE player_name='%s'" \
-              % (stats.total_score, stats.player_name)
+        sql = "UPDATE total SET total_score='%s', bullet_left_score='%s', time_used_score='%s'" \
+              " WHERE player_name='%s'" \
+              % (stats.total_score, stats.bullet_left_score, stats.time_used_score,  stats.player_name)
         mysql_helper.execute(sql)
 
 
 def insert_result(stats, mysql_helper):
     # 插入总分表
-    sql = "INSERT INTO total(player_name, total_score) VALUES ('%s', '%s')" \
-          % (stats.player_name, stats.total_score)
+    sql = "INSERT INTO total(player_name, bullet_left_score, time_used_score, total_score) " \
+          "VALUES ('%s', '%s', '%s', '%s')" \
+          % (stats.player_name, stats.bullet_left_score, stats.time_used_score, stats.total_score)
     mysql_helper.execute(sql)
     # 插入速度成绩表
     sql = "INSERT INTO speed(player_name, time_used, score) VALUES ('%s', '%s', '%s')" \

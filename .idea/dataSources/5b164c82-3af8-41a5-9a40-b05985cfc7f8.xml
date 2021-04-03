@@ -1222,19 +1222,32 @@
     <column id="301" parent="282" name="total_score">
       <Position>3</Position>
       <DataType>smallint(6)|0s</DataType>
+      <NotNull>1</NotNull>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <index id="302" parent="282" name="total_rank_player_name_uindex">
+    <column id="302" parent="282" name="bullet_left_score">
+      <Position>4</Position>
+      <DataType>smallint(6)|0s</DataType>
+      <NotNull>1</NotNull>
+      <ColumnKind>normal</ColumnKind>
+    </column>
+    <column id="303" parent="282" name="time_used_score">
+      <Position>5</Position>
+      <DataType>smallint(6)|0s</DataType>
+      <NotNull>1</NotNull>
+      <ColumnKind>normal</ColumnKind>
+    </column>
+    <index id="304" parent="282" name="total_rank_player_name_uindex">
       <ColNames>player_name</ColNames>
       <Unique>1</Unique>
       <Type>btree</Type>
     </index>
-    <key id="303" parent="282" name="PRIMARY">
+    <key id="305" parent="282" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <ColNames>_id</ColNames>
       <Primary>1</Primary>
     </key>
-    <key id="304" parent="282" name="total_rank_player_name_uindex">
+    <key id="306" parent="282" name="total_rank_player_name_uindex">
       <ColNames>player_name</ColNames>
       <UnderlyingIndexName>total_rank_player_name_uindex</UnderlyingIndexName>
     </key>

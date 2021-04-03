@@ -15,27 +15,26 @@ def check_events(settings, screen, stats, running_info, win_info, failed_info,
     for event in pygame.event.get():
         # 游戏未开始
         if stats.game_state == GameState.PREGAME:
-            check_pregame_events(event, settings, screen, stats, running_info,
-                                 gun, targets, bullets, pregame_info, notice_bars)
+            check_pregame_events(event, settings, screen, stats, targets, pregame_info, notice_bars)
         # 游戏进行中
         elif stats.game_state == GameState.RUNNING:
             check_running_events(event, settings, screen, stats, running_info, gun, bullets)
-        # 游戏完成或失败
+        # 游戏胜利或失败
         else:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
-                    start_game(settings, screen, stats, running_info, gun, targets, bullets, notice_bars)
+                    reset_game(stats, running_info, targets, bullets, notice_bars, gun)
                 elif event.key == pygame.K_SPACE:
                     win_info.switch_top10()
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mouse_x, mouse_y = pygame.mouse.get_pos()
                 if stats.game_state == GameState.GAME_FINISH:
-                    check_restart_button(settings, screen, stats, running_info, win_info,
-                                         gun, targets, bullets, mouse_x, mouse_y, notice_bars)
+                    check_restart_button(stats, win_info, running_info,
+                                         targets, bullets, notice_bars, gun, mouse_x, mouse_y)
                     check_show_tops_button(win_info, mouse_x, mouse_y)
                 elif stats.game_state == GameState.GAME_OVER:
-                    check_restart_button(settings, screen, stats, running_info, failed_info,
-                                         gun, targets, bullets, mouse_x, mouse_y, notice_bars)
+                    check_restart_button(stats, failed_info, running_info,
+                                         targets, bullets, notice_bars, gun, mouse_x, mouse_y)
         # 关闭窗口或按esc键时退出游戏
         if event.type == pygame.QUIT or event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
             stop_timers(stats, targets, notice_bars)
@@ -43,20 +42,19 @@ def check_events(settings, screen, stats, running_info, win_info, failed_info,
             sys.exit()
 
 
-def check_pregame_events(event, settings, screen, stats, running_info,
-                         gun, targets, bullets, pregame_info, notice_bars):
+def check_pregame_events(event, settings, screen, stats, targets, pregame_info, notice_bars):
     """检查开始界面事件"""
     if event.type == pygame.KEYDOWN:
-        if event.key == pygame.K_RETURN and pregame_info.player_name != '':  # 按下回车且输入玩家昵称不为空时开始游戏
-            stats.player_name = pregame_info.player_name
-            start_game(settings, screen, stats, running_info, gun, targets, bullets, notice_bars)
+        if event.key == pygame.K_RETURN:
+            if pregame_info.player_name != '':  # 按下回车且输入玩家昵称不为空时开始游戏
+                stats.player_name = pregame_info.player_name
+                start_game(settings, screen, stats, targets, notice_bars)
         else:  # 输入玩家名
             pregame_info.key_down(event)
             pregame_info.prep_player_name()
     elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:  # 单击鼠标左键
         mouse_x, mouse_y = pygame.mouse.get_pos()
-        check_play_button(settings, screen, stats, running_info, gun, targets, bullets,
-                          pregame_info, mouse_x, mouse_y, notice_bars)
+        check_play_button(settings, screen, stats, targets, pregame_info, mouse_x, mouse_y, notice_bars)
 
 
 def check_running_events(event, settings, screen, stats, running_info, gun, bullets):
@@ -77,20 +75,20 @@ def check_running_events(event, settings, screen, stats, running_info, gun, bull
         fire_bullet(settings, screen, stats, running_info, gun, bullets)
 
 
-def check_play_button(settings, screen, stats, running_info, gun, targets, bullets,
-                      pregame_info, mouse_x, mouse_y, notice_bars):
+def check_play_button(settings, screen, stats, targets, pregame_info, mouse_x, mouse_y, notice_bars):
     """在玩家单击Play按钮时开始新游戏"""
     button_clicked = pregame_info.play_button.rect.collidepoint(mouse_x, mouse_y)
     if button_clicked and pregame_info.player_name != '':   # 开始按钮被点击且输入玩家昵称不为空时开始游戏
         stats.player_name = pregame_info.player_name
-        start_game(settings, screen, stats, running_info, gun, targets, bullets, notice_bars)
+        start_game(settings, screen, stats, targets, notice_bars)
 
 
-def check_restart_button(settings, screen, stats, running_info, info, gun, targets, bullets,
-                         mouse_x, mouse_y, notice_bars):
-    button_clicked = info.restart_button.rect.collidepoint(mouse_x, mouse_y)
+def check_restart_button(stats, finish_over_info, running_info, targets, bullets, notice_bars, gun, mouse_x, mouse_y):
+    """检查重新开始按钮"""
+    button_clicked = finish_over_info.restart_button.rect.collidepoint(mouse_x, mouse_y)
     if button_clicked:
-        start_game(settings, screen, stats, running_info, gun, targets, bullets, notice_bars)
+        reset_game(stats, running_info, targets, bullets, notice_bars, gun)
+        stats.game_state = GameState.PREGAME
 
 
 def stop_timers(stats, targets, notice_bars):
@@ -103,13 +101,14 @@ def stop_timers(stats, targets, notice_bars):
         notice_bar.stop_timer()
 
 
-def start_game(settings, screen, stats, running_info, gun, targets, bullets, notice_bars):
-    """开始游戏"""
-    # 隐藏光标
-    pygame.mouse.set_visible(False)
+def reset_game(stats, running_info, targets, bullets, notice_bars, gun):
+    """重置游戏信息"""
+    # 设置游戏状态为准备
+    stats.game_state = GameState.PREGAME
     # 重置游戏统计信息
-    stats.game_state = GameState.RUNNING
     stats.reset_stats()
+    # 停止bgm
+    pygame.mixer.music.stop()
     # 重置游戏数据图像
     running_info.prep_bullets()
     running_info.prep_timer()
@@ -117,12 +116,20 @@ def start_game(settings, screen, stats, running_info, gun, targets, bullets, not
     targets.empty()
     bullets.empty()
     notice_bars.empty()
+    # 枪支居中
+    gun.center_gun()
+
+
+def start_game(settings, screen, stats, targets, notice_bars):
+    """开始游戏"""
+    # 设置游戏状态为进行中
+    stats.game_state = GameState.RUNNING
+    # 隐藏光标
+    pygame.mouse.set_visible(False)
     # 播放背景音乐
     pygame.mixer.music.play(-1)
     # 创建第一轮靶机
     create_targets(settings, screen, stats, targets, tl)
-    # 枪支居中
-    gun.center_gun()
     # 靶机移动提示
     prep_new_round(settings, screen, targets, notice_bars)
     # 开始计时
@@ -208,6 +215,7 @@ def create_targets(settings, screen, stats, targets, target_list=tl):
 
 
 def check_show_tops_button(win_info, mouse_x, mouse_y):
+    """检查显示排行榜按钮"""
     button_clicked = win_info.show_tops_button.rect.collidepoint(mouse_x, mouse_y)
     if button_clicked:
         win_info.switch_top10()
