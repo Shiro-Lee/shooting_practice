@@ -2,6 +2,7 @@ import pygame
 from button import Button
 from sql_functions import *
 from enum import Enum
+from pygame import gfxdraw
 
 
 class RankState(Enum):
@@ -71,12 +72,14 @@ class PregameInfo:
 
     def key_down(self, event):
         """响应按键"""
-        if event.key == pygame.K_BACKSPACE and len(self.player_name) > 0:     # 退格键
-            self.player_name = self.player_name[:-1]
+        if event.key == pygame.K_BACKSPACE:     # 退格键
+            if len(self.player_name) > 0:
+                self.player_name = self.player_name[:-1]
         elif event.unicode != ' ':   # 输入除空格以外的字符
             if len(self.player_name) < self.max_length:
                 char = event.unicode
                 self.player_name += char
+        print(len(self.player_name))
 
 
 class RunningInfo:
@@ -128,22 +131,22 @@ class RunningInfo:
 
 class WinInfo:
     """游戏胜利信息显示"""
-
     def __init__(self, settings, screen, stats, mysql_helper):
         self.settings = settings
         self.screen = screen
         self.stats = stats
         self.mysql_helper = mysql_helper
-
         self.rank_state = RankState.WIN_INFO
         self.screen_rect = screen.get_rect()
         self.win_font = pygame.font.SysFont('华文琥珀', 60)
-        self.results_font = pygame.font.SysFont('方正姚体', 32)
+        self.results_font = pygame.font.SysFont('方正姚体', 30)
         self.column_font = pygame.font.SysFont('方正姚体', 36)
         self.text_color = (0, 0, 0)
         self.bullet_left, self.bullet_left_image, self.bullet_left_rect = None, None, None
         self.time_used, self.time_used_image, self.time_used_rect = None, None, None
         self.total_score, self.total_score_image, self.total_score_rect = None, None, None
+        self.rank_bg_rect = pygame.Rect(0, 0, 0, 0)  # 排行榜半透明矩形
+        self.rank_bg_rect.height, self.rank_bg_rect.top = 410, 125
 
         # 排行榜标题
         self.rank_title = ''
@@ -206,6 +209,7 @@ class WinInfo:
             self.screen.blit(self.total_score_image, self.total_score_rect)
         else:
             self.screen.blit(self.rank_title_image, self.rank_title_rect)
+            gfxdraw.box(self.screen, self.rank_bg_rect, (255, 255, 255, 128))
             # 显示列名
             for image, rect in zip(self.column_images, self.column_rects):
                 self.screen.blit(image, rect)
@@ -239,10 +243,11 @@ class WinInfo:
 
     def prep_bullet_rank(self):
         """玩家名 剩余弹药数 剩余弹药得分 排名"""
-        """1/5 2/5 3/5 4/5"""
         self.rank_state = RankState.BULLET_TOP10
         self.rank_title = 'Bullet Left Top10'
         self.columns = ['Player', 'Bullet Left', 'Score', 'Rank']
+        self.rank_bg_rect.width = 0.8 * self.settings.screen_width
+        self.rank_bg_rect.centerx = self.screen_rect.centerx
         self.results = get_bullet_top10(self.mysql_helper)
         self.prep_rank()
 
@@ -250,17 +255,20 @@ class WinInfo:
         """玩家名 耗时 耗时得分 排名"""
         """1/5 2/5 3/5 4/5"""
         self.rank_state = RankState.SPEED_TOP10
-        self.columns = ['Player', 'Time Used', 'Score', 'Rank']
         self.rank_title = 'Time Used Top10'
+        self.columns = ['Player', 'Time Used', 'Score', 'Rank']
+        self.rank_bg_rect.width = 0.8 * self.settings.screen_width
+        self.rank_bg_rect.centerx = self.screen_rect.centerx
         self.results = get_speed_top10(self.mysql_helper)
         self.prep_rank()
 
     def prep_total_rank(self):
         """玩家名 剩余弹药得分 耗时得分 总分 排名"""
-        """1/10 3/10 5/10 7/10 9/10"""
         self.rank_state = RankState.TOTAL_TOP10
-        self.columns = ['Player', 'Bullet Left Score', 'Time Used Score', 'Total Score', 'Total Rank']
         self.rank_title = 'Total Top10'
+        self.columns = ['Player', 'Bullet Left Score', 'Time Used Score', 'Total Score', 'Total Rank']
+        self.rank_bg_rect.width = 0.95 * self.settings.screen_width
+        self.rank_bg_rect.centerx = self.screen_rect.centerx
         self.results = get_total_top10(self.mysql_helper)
         self.prep_rank()
 

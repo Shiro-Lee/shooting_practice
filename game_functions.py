@@ -16,7 +16,7 @@ def check_events(settings, screen, stats, running_info, win_info, failed_info,
         # 游戏未开始
         if stats.game_state == GameState.PREGAME:
             check_pregame_events(event, settings, screen, stats, running_info,
-                                     gun, targets, bullets, pregame_info, notice_bars)
+                                 gun, targets, bullets, pregame_info, notice_bars)
         # 游戏进行中
         elif stats.game_state == GameState.RUNNING:
             check_running_events(event, settings, screen, stats, running_info, gun, bullets)
