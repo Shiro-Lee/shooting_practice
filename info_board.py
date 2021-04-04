@@ -1,7 +1,5 @@
 import pygame
 from button import Button
-from sql_functions import *
-from io_functions import *
 from enum import Enum
 from pygame import gfxdraw
 
@@ -131,11 +129,11 @@ class RunningInfo:
 
 class WinInfo:
     """游戏胜利信息显示"""
-    def __init__(self, settings, screen, stats, mysql_helper):
+    def __init__(self, settings, screen, stats, io_helper):
         self.settings = settings
         self.screen = screen
         self.stats = stats
-        self.mysql_helper = mysql_helper
+        self.io_helper = io_helper
         self.rank_state = RankState.WIN_INFO
         self.screen_rect = screen.get_rect()
         self.win_font = pygame.font.SysFont('华文琥珀', 60)
@@ -249,8 +247,7 @@ class WinInfo:
         self.columns = ['Player', 'Bullet Left', 'Score', 'Rank']
         self.rank_bg_rect.width = 0.8 * self.settings.screen_width
         self.rank_bg_rect.centerx = self.screen_rect.centerx
-
-        self.results = get_bullet_top10(self.mysql_helper)
+        self.results = self.io_helper.get_bullet_top10()
 
         self.prep_rank()
 
@@ -261,7 +258,7 @@ class WinInfo:
         self.columns = ['Player', 'Time Used', 'Score', 'Rank']
         self.rank_bg_rect.width = 0.8 * self.settings.screen_width
         self.rank_bg_rect.centerx = self.screen_rect.centerx
-        self.results = get_speed_top10(self.mysql_helper)
+        self.results = self.io_helper.get_speed_top10
         self.prep_rank()
 
     def prep_total_rank(self):
@@ -271,7 +268,7 @@ class WinInfo:
         self.columns = ['Player', 'Bullet Left Score', 'Time Used Score', 'Total Score', 'Total Rank']
         self.rank_bg_rect.width = 0.95 * self.settings.screen_width
         self.rank_bg_rect.centerx = self.screen_rect.centerx
-        self.results = get_total_top10(self.mysql_helper)
+        self.results = self.io_helper.get_total_top10()
         self.prep_rank()
 
     def prep_rank(self):
@@ -334,15 +331,3 @@ class FailedInfo:
     def show_info(self):
         self.screen.blit(self.failed_image, self.failed_rect)
         self.restart_button.draw_button()
-
-
-class Top10Info:
-    def __init__(self, settings, screen, mysql_helper):
-        self.settings = settings
-        self.screen = screen
-        self.mysql_helper = mysql_helper
-        self.title_font = pygame.font.SysFont('华文琥珀', 60)
-        self.data_font = pygame.font.SysFont('方正姚体', 24)
-        self.text_color = (0, 0, 0)
-        self.title = ''
-        self.title_image, self.title_rect = None, None

@@ -1,5 +1,4 @@
 import sys
-import sql_functions as sf
 from game_stats import GameState
 from bullet import Bullet
 from target import UniformTarget, AccelerateTarget
@@ -10,7 +9,7 @@ from info_board import RankState
 
 
 def check_events(settings, screen, stats, running_info, win_info, failed_info,
-                 gun, targets, bullets, pregame_info, notice_bars, mysql_helper):
+                 gun, targets, bullets, pregame_info, notice_bars):
     """处理事件"""
     for event in pygame.event.get():
         # 游戏未开始
@@ -38,7 +37,6 @@ def check_events(settings, screen, stats, running_info, win_info, failed_info,
         # 关闭窗口或按esc键时退出游戏
         if event.type == pygame.QUIT or event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
             stop_timers(stats, targets, notice_bars)
-            mysql_helper.close()
             sys.exit()
 
 
@@ -144,30 +142,15 @@ def game_over(stats, targets, notice_bars):
     stats.new_timer()
 
 
-def game_finish(stats, win_info, mysql_helper):
+def game_finish(stats, win_info, io_helper):
     """击破全部靶机，游戏胜利"""
     stats.game_state = GameState.GAME_FINISH
+    stats.game_finish()
     win_info.rank_state = RankState.WIN_INFO
     win_info.prep_button_msg('- Show Top10 -')
     pygame.mouse.set_visible(True)
-    stats.time_used = stats.overall_timer.pass_time
-    stats.stop_timer()
-    stats.new_timer()
-    cal_score(stats)
     win_info.prep_score()
-    sf.check_player(stats, mysql_helper)
-
-
-def cal_score(stats):
-    """计算得分"""
-    # 剩余弹药分=剩余弹药数*100
-    bullet_left_score = stats.bullet_left * 100
-    # 耗时得分=(200-耗时)*50
-    time_used_score = int((200-stats.time_used)*50) if stats.time_used < 200 else 0
-    total_score = bullet_left_score + time_used_score
-    stats.bullet_left_score = bullet_left_score
-    stats.time_used_score = time_used_score
-    stats.total_score = total_score
+    io_helper.check_player()
 
 
 def prep_new_round(settings, screen, targets, notice_bars):
@@ -221,7 +204,7 @@ def check_show_tops_button(win_info, mouse_x, mouse_y):
         win_info.switch_top10()
 
 
-def update_bullets(settings, screen, stats, targets, bullets, notice_bars, win_info, mysql_helper):
+def update_bullets(settings, screen, stats, targets, bullets, notice_bars, win_info, io_helper):
     """更新子弹位置，并删除已消失的子弹，同时判定游戏是否结束"""
     bullets.update()
     check_bullet_target_collisions(stats, targets, bullets)
@@ -234,7 +217,7 @@ def update_bullets(settings, screen, stats, targets, bullets, notice_bars, win_i
                     return
             if not stats.target_left:
                 if stats.round == settings.max_round:   # 当前为最后一轮
-                    game_finish(stats, win_info, mysql_helper)
+                    game_finish(stats, win_info, io_helper)
                 else:   # 进入下一轮
                     stats.round += 1
                     create_targets(settings, screen, stats, targets, tl)

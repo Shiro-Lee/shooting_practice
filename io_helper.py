@@ -5,8 +5,8 @@ import os
 class IOHelper:
     def __init__(self, stats):
         self.stats = stats
-        self.player_name = stats.player_name
-        self.file_name = 'rank_data.txt'
+        self.player_name = 'Shooter'
+        self.file_name = 'rank_test.txt'
         self.results = {}
         self.bullet_results = {}
         self.speed_results = {}
@@ -15,15 +15,19 @@ class IOHelper:
 
     def load_data(self):
         if os.path.getsize(self.file_name) != 0:
-            with open(self.file_name, 'r'):
-                self.results = json.load(self.file_name)
+            with open(self.file_name, 'r') as file:
+                self.results = json.load(file)
             self.bullet_results = self.results['bullet_results']
             self.speed_results = self.results['speed_results']
             self.total_results = self.results['total_results']
 
     def check_player(self):
+        """检查是否有该玩家的记录"""
+        self.player_name = self.stats.player_name
+        # 是则检查最高分
         if self.stats.player_name in self.total_results.keys():
             self.check_higher_score()
+        # 否则插入本次记录
         else:
             self.update_bullet_result()
             self.update_speed_result()

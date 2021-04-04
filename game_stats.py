@@ -26,6 +26,13 @@ class GameStats:
         self.time_used_score = 0
         self.total_score = 0
 
+    def game_finish(self):
+        self.stop_timer()
+        self.time_used = int(self.overall_timer.pass_time*100)/100
+        self.new_timer()
+        self.cal_score()
+        print(self.overall_timer.pass_time)
+
     def reset_stats(self):
         """重置统计信息"""
         self.round = 1
@@ -33,6 +40,15 @@ class GameStats:
         self.time_used = 0
         self.target_left = True
         self.reset_timer()
+
+    def cal_score(self):
+        """计算得分"""
+        # 剩余弹药得分=剩余弹药数*100
+        self.bullet_left_score = self.bullet_left * 100
+        # 耗时得分=(200-耗时)*50
+        self.time_used_score = int((200-self.time_used)*50) if self.time_used < 200 else 0
+        # 总分=剩余弹药分+耗时得分
+        self.total_score = self.bullet_left_score + self.time_used_score
 
     def start_timer(self):
         self.overall_timer.begin()
