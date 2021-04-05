@@ -7,7 +7,7 @@ class IOHelper:
     def __init__(self, stats):
         self.stats = stats
         self.player_name = ''
-        self.file_name = 'data_test.txt'
+        self.file_name = 'data'     # 玩家记录存放文件名
         self.new_result = False     # 若产生新纪录则重新加载
         self.results = {}   # 全部记录列表
         self.bullet_results = {}    # 剩余弹药得分列表
@@ -15,7 +15,7 @@ class IOHelper:
         self.total_results = {}     # 总得分列表
 
     def load_data(self):
-        """读取数据"""
+        """从文件读取数据"""
         try:
             if os.path.getsize(self.file_name) != 0:
                 with open(self.file_name, 'r') as file:
@@ -28,11 +28,11 @@ class IOHelper:
                 pass
 
     def check_player(self):
-        """检查是否有该玩家的记录"""
+        """检查是否已有该玩家的记录"""
         self.load_data()
         self.player_name = self.stats.player_name
         self.new_result = False
-        # 是则检查最高分
+        # 是则检查是否产生最高分
         if self.stats.player_name in self.total_results.keys():
             self.check_higher_score()
         # 否则插入本次记录
