@@ -102,6 +102,7 @@ class RunningInfo:
         self.prep_timer()
 
     def prep_bullets(self):
+        """准备剩余弹药信息"""
         # 将剩余弹药数转换为渲染图像
         bullet_str = str(self.stats.bullet_left)
         self.bullet_left_image = self.bullet_font.render(bullet_str, True, self.text_color, None)
@@ -111,6 +112,7 @@ class RunningInfo:
         self.bullet_left_rect.centery = self.bullet_rect.centery
 
     def prep_timer(self):
+        """准备计时信息"""
         self.timer.time_change = False
         self.timer.set_time_str()
         # 将计时数转换为渲染图像
@@ -122,6 +124,7 @@ class RunningInfo:
         self.timer_rect.bottom = self.screen_rect.bottom - self.settings.y_target_boundary
 
     def show_info(self):
+        """显示剩余弹药数、计时"""
         self.screen.blit(self.bullet_image, self.bullet_rect)
         self.screen.blit(self.bullet_left_image, self.bullet_left_rect)
         self.screen.blit(self.timer_image, self.timer_rect)
@@ -174,6 +177,7 @@ class WinInfo:
         self.show_tops_button.prep_msg()
 
     def prep_score(self):
+        """准备各项得分"""
         # 剩余弹药得分
         self.bullet_left = 'Bullet Left Score: ' + str(self.stats.bullet_left_score)
         self.bullet_left_image = self.results_font.render(self.bullet_left, True, self.text_color)
@@ -194,6 +198,7 @@ class WinInfo:
         self.total_score_rect.top = self.time_used_rect.bottom
 
     def prep_title(self):
+        """准备排行标题"""
         self.rank_title_image = self.win_font.render(self.rank_title, True, self.text_color)
         self.rank_title_rect = self.rank_title_image.get_rect()
         self.rank_title_rect.centerx = self.screen.get_rect().centerx
@@ -248,7 +253,6 @@ class WinInfo:
         self.rank_bg_rect.width = 0.8 * self.settings.screen_width
         self.rank_bg_rect.centerx = self.screen_rect.centerx
         self.results = self.io_helper.get_bullet_top10()
-
         self.prep_rank()
 
     def prep_speed_rank(self):
@@ -258,7 +262,7 @@ class WinInfo:
         self.columns = ['Player', 'Time Used', 'Score', 'Rank']
         self.rank_bg_rect.width = 0.8 * self.settings.screen_width
         self.rank_bg_rect.centerx = self.screen_rect.centerx
-        self.results = self.io_helper.get_speed_top10
+        self.results = self.io_helper.get_speed_top10()
         self.prep_rank()
 
     def prep_total_rank(self):
@@ -278,10 +282,21 @@ class WinInfo:
         start_x = self.settings.screen_width * 0.2 if len(self.columns) == 4 else self.settings.screen_width * 0.1
         start_y = 200
         i, j = 0, 0
+        # 准备显示玩家名
         for result in self.results:
-            i = 0
+            player_name_image = self.results_font.render(result[0], True, self.text_color)
+            player_name_rect = player_name_image.get_rect()
+            player_name_rect.centerx = start_x
+            player_name_rect.centery = start_y + j * interval_y
+            self.result_images.append(player_name_image)
+            self.result_rects.append(player_name_rect)
+            j += 1
+        j = 0
+        # 准备显示得分数据
+        for result in self.results:
+            i = 1
             centery = start_y + j * interval_y
-            for value in result.values():
+            for value in result[1].values():
                 result_image = self.results_font.render(str(value), True, self.text_color)
                 result_rect = result_image.get_rect()
                 result_rect.centerx = start_x + i * interval_x
@@ -289,8 +304,6 @@ class WinInfo:
                 self.result_images.append(result_image)
                 self.result_rects.append(result_rect)
                 i += 1
-                self.result_images.append(result_image)
-                self.result_rects.append(result_rect)
             j += 1
 
     def prep_columns(self, columns):
@@ -329,5 +342,6 @@ class FailedInfo:
         self.restart_button.prep_msg()
 
     def show_info(self):
+        """显示游戏失败提示及重新开始按钮"""
         self.screen.blit(self.failed_image, self.failed_rect)
         self.restart_button.draw_button()

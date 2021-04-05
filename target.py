@@ -44,9 +44,10 @@ class Target(TargetSample, Sprite):
             self.life = 1
 
     def update_shield(self):
+        """更新护盾状态"""
         if self.args[3] and self.shield_timer.pass_time > 5:    # 带盾靶机每5秒会重新生成护盾
             self.shield_timer.reset()
-            if self.life < 2:
+            if self.life < 2:   # 重新生成护盾，靶机变为蓝色
                 self.image = pygame.image.load('images/target_shield.png')
                 self.life = 2
 
@@ -65,7 +66,7 @@ class Target(TargetSample, Sprite):
     def kill(self):
         """重写kill()，响应靶机被击中"""
         if self.timer.pass_time > 0.5:  # 0.5秒内的碰撞视为击中同一个靶机
-            if self.life > 1:   # 击破护盾
+            if self.life > 1:   # 击破护盾，靶机变为灰色
                 shield_broken_sound.play()
                 self.life -= 1
                 self.image = pygame.image.load('images/target.png')

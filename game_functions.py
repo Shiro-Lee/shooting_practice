@@ -254,7 +254,7 @@ def common_update_screen(background, settings, screen, stats, running_info,
                          gun, target_sample, targets, bullets, notice_bars):
     """更新屏幕上的图像，并切换到新屏幕"""
     screen.blit(background, (0, 0))
-    if stats.round != settings.max_round:
+    if stats.round != settings.max_round:   # 未到最后一轮则绘制四个靶机示例（最后一轮必须为四个靶机）
         draw_target_sample(settings, target_sample, screen)
     gun.blitme()
     targets.draw(screen)

@@ -53,4 +53,5 @@ class MyTimer:
         self.pass_time = 0.0
 
     def new_timer(self):
+        """重置计时器"""
         self.timer = RepeatingTimer(0.01, self.update)

@@ -11,27 +11,26 @@ class GameState(Enum):
 
 class GameStats:
     """跟踪游戏的统计信息"""
-
     def __init__(self, settings, timer):
         """初始化统计信息"""
         self.settings = settings
-        self.overall_timer = timer
+        self.overall_timer = timer  # 全局计时器
         self.game_state = GameState.PREGAME    # 游戏状态
         self.player_name = ''   # 玩家名
-        self.round = 1  # 轮数
-        self.target_left = True
-        self.bullet_left = self.settings.bullet_limit
-        self.time_used = 0
-        self.bullet_left_score = 0
-        self.time_used_score = 0
-        self.total_score = 0
+        self.round = 1  # 游戏轮数
+        self.target_left = True     # 当前轮数是否还有靶机标志
+        self.bullet_left = self.settings.bullet_limit   # 剩余弹药数
+        self.time_used = 0  # 游戏结束时的耗时
+        self.bullet_left_score = 0  # 剩余弹药数得分
+        self.time_used_score = 0    # 耗时得分
+        self.total_score = 0    # 总计得分
 
     def game_finish(self):
+        """游戏完成，重置信息并计算得分"""
         self.stop_timer()
         self.time_used = int(self.overall_timer.pass_time*100)/100
         self.new_timer()
         self.cal_score()
-        print(self.overall_timer.pass_time)
 
     def reset_stats(self):
         """重置统计信息"""
