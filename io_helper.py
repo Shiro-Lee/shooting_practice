@@ -8,7 +8,6 @@ class IOHelper:
         self.stats = stats
         self.player_name = ''
         self.file_name = 'data'     # 玩家记录存放文件名
-        self.new_result = False     # 若产生新纪录则重新加载
         self.results = {}   # 全部记录列表
         self.bullet_results = {}    # 剩余弹药得分列表
         self.speed_results = {}     # 耗时得分列表
@@ -31,7 +30,6 @@ class IOHelper:
         """检查是否已有该玩家的记录"""
         self.load_data()
         self.player_name = self.stats.player_name
-        self.new_result = False
         # 是则检查是否产生最高分
         if self.stats.player_name in self.total_results.keys():
             self.check_higher_score()
@@ -42,7 +40,6 @@ class IOHelper:
             self.update_total_result()
             with open(self.file_name, 'w') as file:
                 json.dump(self.results, file)
-            self.new_result = True
 
     def check_higher_score(self):
         """检查是否产生最高分"""
@@ -57,7 +54,6 @@ class IOHelper:
             self.update_total_result()
             higher_score = True
         if higher_score:
-            self.new_result = True
             with open(self.file_name, 'w') as file:
                 json.dump(self.results, file)
 
@@ -82,24 +78,18 @@ class IOHelper:
 
     def get_bullet_top10(self):
         """获取剩余弹药得分排行"""
-        if self.new_result:
-            self.load_data()
         sorted_results = sorted(self.bullet_results.items(), key=lambda results: (results[1]['score']), reverse=True)
         self.add_rank(sorted_results)
         return sorted_results
 
     def get_speed_top10(self):
         """获取耗时得分排行"""
-        if self.new_result:
-            self.load_data()
         sorted_results = sorted(self.speed_results.items(), key=lambda results: (results[1]['score']), reverse=True)
         self.add_rank(sorted_results)
         return sorted_results
 
     def get_total_top10(self):
         """获取总得分排行"""
-        if self.new_result:
-            self.load_data()
         sorted_results = sorted(self.total_results.items(), key=lambda results: (results[1]['score']), reverse=True)
         self.add_rank(sorted_results)
         return sorted_results
