@@ -78,19 +78,22 @@ class IOHelper:
 
     def get_bullet_top10(self):
         """获取剩余弹药得分排行"""
-        sorted_results = sorted(self.bullet_results.items(), key=lambda results: (results[1]['score']), reverse=True)
+        sorted_results = sorted(self.bullet_results.items(),
+                                key=lambda results: (results[1]['score']), reverse=True)[:10]
         self.add_rank(sorted_results)
         return sorted_results
 
     def get_speed_top10(self):
         """获取耗时得分排行"""
-        sorted_results = sorted(self.speed_results.items(), key=lambda results: (results[1]['score']), reverse=True)
+        sorted_results = sorted(self.speed_results.items(),
+                                key=lambda results: (results[1]['score']), reverse=True)[:10]
         self.add_rank(sorted_results)
         return sorted_results
 
     def get_total_top10(self):
         """获取总得分排行"""
-        sorted_results = sorted(self.total_results.items(), key=lambda results: (results[1]['score']), reverse=True)
+        sorted_results = sorted(self.total_results.items(),
+                                key=lambda results: (results[1]['score']), reverse=True)[:10]
         self.add_rank(sorted_results)
         return sorted_results
 

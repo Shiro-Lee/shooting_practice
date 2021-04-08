@@ -2,6 +2,9 @@ import pygame
 from pygame.sprite import Sprite
 from my_timer import MyTimer
 from music_and_sound import target_broken_sound, shield_broken_sound
+from os import path
+
+dir_path = path.dirname(path.abspath(__file__))
 
 
 class TargetSample:
@@ -9,7 +12,7 @@ class TargetSample:
 
     def __init__(self):
         # 加载靶机图像并获取其rect属性
-        self.image = pygame.image.load('images/target.png')
+        self.image = pygame.image.load(dir_path + r'\images\target.png')
         self.rect = self.image.get_rect()
 
 
@@ -38,7 +41,7 @@ class Target(TargetSample, Sprite):
 
         self.delay = self.args[4]   # 靶机延时启动时长
         if self.args[3]:    # 带盾
-            self.image = pygame.image.load('images/target_shield.png')
+            self.image = pygame.image.load(dir_path + r'\images\target_shield.png')
             self.life = 2
         else:   # 无盾
             self.life = 1
@@ -48,7 +51,7 @@ class Target(TargetSample, Sprite):
         if self.args[3] and self.shield_timer.pass_time > 5:    # 带盾靶机每5秒会重新生成护盾
             self.shield_timer.reset()
             if self.life < 2:   # 重新生成护盾，靶机变为蓝色
-                self.image = pygame.image.load('images/target_shield.png')
+                self.image = pygame.image.load(dir_path + r'\images\target_shield.png')
                 self.life = 2
 
     def check_edges(self):
@@ -69,7 +72,7 @@ class Target(TargetSample, Sprite):
             if self.life > 1:   # 击破护盾，靶机变为灰色
                 shield_broken_sound.play()
                 self.life -= 1
-                self.image = pygame.image.load('images/target.png')
+                self.image = pygame.image.load(dir_path + r'\images\target.png')
                 self.timer.reset()
             else:   # 击破靶机
                 target_broken_sound.play()

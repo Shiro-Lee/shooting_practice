@@ -22,7 +22,8 @@ def run_game():
     pygame.display.set_caption("Shooting Practice")
 
     # 背景图
-    background = pygame.image.load('images/background.jpg').convert()
+    dir_path = os.path.dirname(os.path.abspath(__file__))
+    background = pygame.image.load(dir_path + r'\images\background.jpg').convert()
 
     # 创建枪支、子弹编组
     gun = Gun(settings, screen)

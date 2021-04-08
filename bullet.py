@@ -1,5 +1,6 @@
 import pygame
 from pygame.sprite import Sprite
+from os import path
 
 
 class Bullet(Sprite):
@@ -10,7 +11,8 @@ class Bullet(Sprite):
         self.screen = screen
 
         # 从枪口发射子弹
-        self.image = pygame.image.load('images/bullet.png')
+        dir_path = path.dirname(path.abspath(__file__))
+        self.image = pygame.image.load(dir_path + r'\images\bullet.png')
         self.rect = self.image.get_rect()
         self.rect.centery = gun.rect.centery
         self.rect.right = gun.rect.right

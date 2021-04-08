@@ -2,6 +2,9 @@ import pygame
 from button import Button
 from enum import Enum
 from pygame import gfxdraw
+from os import path
+
+dir_path = path.dirname(path.abspath(__file__))
 
 
 class RankState(Enum):
@@ -38,7 +41,7 @@ class PregameInfo:
         self.title_rect.centerx = self.box_rect.centerx
         self.title_rect.bottom = self.box_rect.top - 64
         # logo，和标题放在一起
-        self.logo_image = pygame.image.load('images/logo.png')
+        self.logo_image = pygame.image.load(dir_path + r'\images\logo.png')
         self.logo_rect = self.logo_image.get_rect()
         self.logo_rect.center = self.title_rect.center
         # 创建开始按钮，放在文本框下方
@@ -89,7 +92,7 @@ class RunningInfo:
         self.settings = settings
         self.stats = stats
         self.timer = stats.overall_timer
-        self.bullet_image = pygame.image.load('images/bullet_sample.png')
+        self.bullet_image = pygame.image.load(dir_path + r'\images\bullet_sample.png')
         self.bullet_rect = self.bullet_image.get_rect()
         self.bullet_rect.left, self.bullet_rect.top = self.settings.screen_width/15, settings.y_target_boundary
         self.timer_image, self.timer_rect = None, None

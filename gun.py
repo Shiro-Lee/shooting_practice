@@ -1,4 +1,5 @@
 import pygame
+from os import path
 
 
 class Gun:
@@ -11,7 +12,8 @@ class Gun:
         self.screen_rect = screen.get_rect()
 
         # 加载枪支图像并获取其外接矩形
-        self.image = pygame.image.load('images/gun.png')
+        dir_path = path.dirname(path.abspath(__file__))
+        self.image = pygame.image.load(dir_path + r'\images\gun.png')
         self.rect = self.image.get_rect()
 
         # 枪支初始位置在左侧中央
