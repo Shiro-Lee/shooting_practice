@@ -17,12 +17,13 @@ class RankState(Enum):
 
 class PregameInfo:
     """游戏开始界面"""
-    def __init__(self, screen, stats):
+    def __init__(self, settings, screen, stats):
         self.width, self.height = 300, 50
         self.text_color = (0, 0, 0)
         self.box_color = (255, 255, 255)
         self.screen = screen
         self.stats = stats
+        self.settings = settings
         self.screen_rect = screen.get_rect()
         self.player_name_image, self.player_name_rect = None, None
         self.max_length = 10    # 玩家id最长为10个字符
@@ -34,16 +35,10 @@ class PregameInfo:
         self.box_rect.top = self.screen_rect.centery
         self.prep_player_name()
         # 标题，放在界面上方
-        self.title = 'Shooting Practice'
-        self.title_font = pygame.font.SysFont('华文琥珀', 72)
-        self.title_image = self.title_font.render(self.title, True, self.text_color)
+        self.title_image = pygame.image.load(dir_path + r'\images\title.png')
         self.title_rect = self.title_image.get_rect()
         self.title_rect.centerx = self.box_rect.centerx
-        self.title_rect.bottom = self.box_rect.top - 64
-        # logo，和标题放在一起
-        self.logo_image = pygame.image.load(dir_path + r'\images\logo.png')
-        self.logo_rect = self.logo_image.get_rect()
-        self.logo_rect.center = self.title_rect.center
+        self.title_rect.bottom = self.box_rect.top - 10
         # 创建开始按钮，放在文本框下方
         self.play_button = Button(screen, '- Play -')
         self.play_button.rect.centerx = self.box_rect.centerx
@@ -56,6 +51,22 @@ class PregameInfo:
         self.notice_rect = self.notice_image.get_rect()
         self.notice_rect.centerx = self.box_rect.centerx
         self.notice_rect.bottom = self.player_name_rect.top - 15
+        # 喇叭
+        self.sounds_on_image = pygame.image.load(dir_path + r'\images\sounds_on.png')
+        self.sounds_off_image = pygame.image.load(dir_path + r'\images\sounds_off.png')
+        self.sound_image = self.sounds_on_image
+        self.sound_rect = self.sound_image.get_rect()
+        self.sound_rect.right = self.settings.screen_width/15 * 14
+        self.sound_rect.bottom = self.settings.screen_height - self.settings.y_target_boundary
+
+    def switch_sound(self):
+        """切换音乐播放状态"""
+        if self.stats.sound_state:
+            self.stats.sound_state = False
+            self.sound_image = self.sounds_off_image
+        else:
+            self.stats.sound_state = True
+            self.sound_image = self.sounds_on_image
 
     def prep_player_name(self):
         """将输入玩家名转化为图像"""
@@ -65,11 +76,11 @@ class PregameInfo:
 
     def draw_pregame_info(self):
         """绘制游戏开始界面"""
-        self.screen.blit(self.logo_image, self.logo_rect)
         self.screen.blit(self.title_image, self.title_rect)
         self.screen.blit(self.notice_image, self.notice_rect)
         self.screen.fill(self.box_color, self.box_rect)
         self.screen.blit(self.player_name_image, self.player_name_rect)
+        self.screen.blit(self.sound_image, self.sound_rect)
         self.play_button.draw_button()
 
     def key_down(self, event):
@@ -92,15 +103,27 @@ class RunningInfo:
         self.settings = settings
         self.stats = stats
         self.timer = stats.overall_timer
+        # 弹药图标
         self.bullet_image = pygame.image.load(dir_path + r'\images\bullet_sample.png')
         self.bullet_rect = self.bullet_image.get_rect()
         self.bullet_rect.left, self.bullet_rect.top = self.settings.screen_width/15, settings.y_target_boundary
-        self.timer_image, self.timer_rect = None, None
+        # 计时器图标
+        self.timer_image = pygame.image.load(dir_path + r'\images\timer.png')
+        self.timer_rect = self.timer_image.get_rect()
+        self.timer_rect.left = self.settings.screen_width / 15
+        self.timer_rect.bottom = self.screen_rect.bottom - self.settings.y_target_boundary
+        # 剩余弹药数、耗时数
+        self.time_used_image, self.time_used_rect = None, None
         self.bullet_left_image, self.bullet_left_rect = None, None
+        # 剩余弹药数提示条
+        self.bullet_left_bar = pygame.Rect(0, 0, 100, 5)
+        self.bullet_left_bar_color = (0, 200, 0)
+        self.bullet_left_bar.left = self.bullet_rect.right + 10
+        self.bullet_left_bar.bottom = self.bullet_rect.bottom - 2
         # 字体设置
         self.text_color = (0, 0, 0)
         self.bullet_font = pygame.font.SysFont('华文彩云', 70)
-        self.timer_font = pygame.font.SysFont('华文琥珀', 48)
+        self.time_used_font = pygame.font.SysFont('华文琥珀', 48)
         self.prep_bullets()
         self.prep_timer()
 
@@ -112,7 +135,14 @@ class RunningInfo:
         # 将剩余弹药数显示在弹药图案右方
         self.bullet_left_rect = self.bullet_left_image.get_rect()
         self.bullet_left_rect.left = self.bullet_rect.right + 10
-        self.bullet_left_rect.centery = self.bullet_rect.centery
+        self.bullet_left_rect.top = self.bullet_rect.top
+
+    def prep_bullet_left_bar(self):
+        self.bullet_left_bar.width = self.stats.bullet_left
+        if 20 <= self.stats.bullet_left < 50:
+            self.bullet_left_bar_color = (200, 200, 0)
+        elif self.stats.bullet_left < 20:
+            self.bullet_left_bar_color = (200, 0, 0)
 
     def prep_timer(self):
         """准备计时信息"""
@@ -120,17 +150,19 @@ class RunningInfo:
         self.timer.set_time_str()
         # 将计时数转换为渲染图像
         time_str = self.timer.time_str
-        self.timer_image = self.timer_font.render(time_str, True, self.text_color, None)
+        self.time_used_image = self.time_used_font.render(time_str, True, self.text_color, None)
         # 将计时数显示在左下角
-        self.timer_rect = self.timer_image.get_rect()
-        self.timer_rect.left = self.settings.screen_width/15
-        self.timer_rect.bottom = self.screen_rect.bottom - self.settings.y_target_boundary
+        self.time_used_rect = self.time_used_image.get_rect()
+        self.time_used_rect.left = self.timer_rect.right + 20
+        self.time_used_rect.centery = self.timer_rect.centery
 
     def show_info(self):
         """显示剩余弹药数、计时"""
         self.screen.blit(self.bullet_image, self.bullet_rect)
         self.screen.blit(self.bullet_left_image, self.bullet_left_rect)
         self.screen.blit(self.timer_image, self.timer_rect)
+        self.screen.blit(self.time_used_image, self.time_used_rect)
+        self.screen.fill(self.bullet_left_bar_color, self.bullet_left_bar)
 
 
 class WinInfo:
@@ -167,6 +199,12 @@ class WinInfo:
         self.win_rect = self.win_image.get_rect()
         self.win_rect.centerx, self.win_rect.bottom = self.screen_rect.centerx, self.screen_rect.centery
 
+        # 奖杯
+        self.trophy_image = pygame.image.load(dir_path + r'\images\trophy.png')
+        self.trophy_rect = self.trophy_image.get_rect()
+        self.trophy_rect.centerx = self.screen_rect.centerx
+        self.trophy_rect.bottom = self.win_rect.top - 10
+
         # 重新开始按钮
         self.restart_button = Button(screen, '- Restart -')
         self.restart_button.rect.centerx = self.win_rect.centerx
@@ -178,6 +216,22 @@ class WinInfo:
         self.show_tops_button.rect.centerx = self.win_rect.centerx
         self.show_tops_button.rect.bottom = self.restart_button.rect.top - 10
         self.show_tops_button.prep_msg()
+
+        # 排行榜图标
+        self.crown_image = pygame.image.load(dir_path + r'\images\crown.png')
+        self.crown_rect = self.crown_image.get_rect()
+        self.crown_rect.centerx = self.screen_rect.centerx
+        self.crown_rect.bottom = self.settings.y_target_boundary
+        self.center_image, self.center_rect = None, None
+        self.timer_image = pygame.image.load(dir_path + r'\images\time.png')
+        self.timer_rect = self.timer_image.get_rect()
+        self.timer_rect.center = self.screen_rect.center
+        self.bullets_image = pygame.image.load(dir_path + r'\images\bullets.png')
+        self.bullets_rect = self.bullets_image.get_rect()
+        self.bullets_rect.center = self.screen_rect.center
+        self.medal_image = pygame.image.load(dir_path + r'\images\medal.png')
+        self.medal_rect = self.medal_image.get_rect()
+        self.medal_rect.center = self.screen_rect.center
 
     def prep_score(self):
         """准备各项得分"""
@@ -211,11 +265,14 @@ class WinInfo:
         """显示得分/排行榜"""
         if self.rank_state == RankState.WIN_INFO:
             self.screen.blit(self.win_image, self.win_rect)
+            self.screen.blit(self.trophy_image, self.trophy_rect)
             self.screen.blit(self.bullet_left_image, self.bullet_left_rect)
             self.screen.blit(self.time_used_image, self.time_used_rect)
             self.screen.blit(self.total_score_image, self.total_score_rect)
         else:
+            self.screen.blit(self.crown_image, self.crown_rect)
             self.screen.blit(self.rank_title_image, self.rank_title_rect)
+            self.screen.blit(self.center_image, self.center_rect)
             gfxdraw.box(self.screen, self.rank_bg_rect, (255, 255, 255, 128))
             # 显示列名
             for image, rect in zip(self.column_images, self.column_rects):
@@ -255,6 +312,7 @@ class WinInfo:
         self.columns = ['Player', 'Bullet Left', 'Score', 'Rank']
         self.rank_bg_rect.width = 0.8 * self.settings.screen_width
         self.rank_bg_rect.centerx = self.screen_rect.centerx
+        self.center_image, self.center_rect = self.bullets_image, self.bullets_rect
         self.results = self.io_helper.get_bullet_top10()
         self.prep_rank()
 
@@ -265,6 +323,7 @@ class WinInfo:
         self.columns = ['Player', 'Time Used', 'Score', 'Rank']
         self.rank_bg_rect.width = 0.8 * self.settings.screen_width
         self.rank_bg_rect.centerx = self.screen_rect.centerx
+        self.center_image, self.center_rect = self.timer_image, self.timer_rect
         self.results = self.io_helper.get_speed_top10()
         self.prep_rank()
 
@@ -275,6 +334,7 @@ class WinInfo:
         self.columns = ['Player', 'Bullet Left Score', 'Time Used Score', 'Total Score', 'Total Rank']
         self.rank_bg_rect.width = 0.95 * self.settings.screen_width
         self.rank_bg_rect.centerx = self.screen_rect.centerx
+        self.center_image, self.center_rect = self.medal_image, self.medal_rect
         self.results = self.io_helper.get_total_top10()
         self.prep_rank()
 
@@ -338,6 +398,11 @@ class FailedInfo:
         self.failed_image = self.failed_font.render(self.failed_text, True, self.text_color)
         self.failed_rect = self.failed_image.get_rect()
         self.failed_rect.center = self.screen.get_rect().center
+        # 游戏失败图标
+        self.game_over_image = pygame.image.load(dir_path + r'\images\game_over.png')
+        self.game_over_rect = self.game_over_image.get_rect()
+        self.game_over_rect.centerx = self.screen.get_rect().centerx
+        self.game_over_rect.bottom = self.failed_rect.top - 5
         # 重新开始按钮
         self.restart_button = Button(screen, '- Restart -')
         self.restart_button.rect.centerx = self.failed_rect.centerx
@@ -347,4 +412,5 @@ class FailedInfo:
     def show_info(self):
         """显示游戏失败提示及重新开始按钮"""
         self.screen.blit(self.failed_image, self.failed_rect)
+        self.screen.blit(self.game_over_image, self.game_over_rect)
         self.restart_button.draw_button()

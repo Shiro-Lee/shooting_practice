@@ -23,7 +23,7 @@ def check_events(settings, screen, stats, running_info, win_info, failed_info,
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
                     reset_game(stats, running_info, targets, bullets, notice_bars, gun)
-                elif event.key == pygame.K_SPACE:
+                elif event.key == pygame.K_SPACE and stats.game_state == GameState.GAME_FINISH:
                     win_info.switch_top10()
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mouse_x, mouse_y = pygame.mouse.get_pos()
@@ -52,6 +52,7 @@ def check_pregame_events(event, settings, screen, stats, targets, pregame_info, 
             pregame_info.prep_player_name()
     elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:  # 单击鼠标左键
         mouse_x, mouse_y = pygame.mouse.get_pos()
+        check_sound_button(pregame_info, mouse_x, mouse_y)
         check_play_button(settings, screen, stats, targets, pregame_info, mouse_x, mouse_y, notice_bars)
 
 
@@ -79,6 +80,12 @@ def check_play_button(settings, screen, stats, targets, pregame_info, mouse_x, m
     if button_clicked and pregame_info.player_name != '':   # 开始按钮被点击且输入玩家昵称不为空时开始游戏
         stats.player_name = pregame_info.player_name
         start_game(settings, screen, stats, targets, notice_bars)
+
+
+def check_sound_button(pregame_info, mouse_x, mouse_y):
+    button_clicked = pregame_info.sound_rect.collidepoint(mouse_x, mouse_y)
+    if button_clicked:   # 开始按钮被点击且输入玩家昵称不为空时开始游戏
+        pregame_info.switch_sound()
 
 
 def check_restart_button(stats, finish_over_info, running_info, targets, bullets, notice_bars, gun, mouse_x, mouse_y):
@@ -114,6 +121,9 @@ def reset_game(stats, running_info, targets, bullets, notice_bars, gun):
     targets.empty()
     bullets.empty()
     notice_bars.empty()
+    # 重置剩余弹药数提示条
+    running_info.bullet_left_bar.width = stats.bullet_left
+    running_info.bullet_left_bar_color = (0, 180, 0)
     # 枪支居中
     gun.center_gun()
 
@@ -125,7 +135,8 @@ def start_game(settings, screen, stats, targets, notice_bars):
     # 隐藏光标
     pygame.mouse.set_visible(False)
     # 播放背景音乐
-    pygame.mixer.music.play(-1)
+    if stats.sound_state:
+        pygame.mixer.music.play(-1)
     # 创建第一轮靶机
     create_targets(settings, screen, stats, targets, tl)
     # 靶机移动提示
@@ -165,8 +176,10 @@ def fire_bullet(settings, screen, stats, running_info, gun, bullets):
     """如果还没有达到限制，就发射一颗子弹"""
     # 创建新子弹，并将其加入到编组bullets中
     if len(bullets) < settings.bullets_allowed and stats.bullet_left > 0:
-        fire_sound.play()
+        if stats.sound_state:
+            fire_sound.play()
         stats.bullet_left -= 1
+        running_info.prep_bullet_left_bar()
         running_info.prep_bullets()
         new_bullet = Bullet(settings, screen, gun)
         bullets.add(new_bullet)
@@ -188,9 +201,9 @@ def create_targets(settings, screen, stats, targets, target_list=tl):
     stats.target_left = True
     for target_attribute in target_list[stats.round-1]:
         if target_attribute[1]:     # target_attribute[1]为True，创建变速靶
-            target = AccelerateTarget(settings, screen, *target_attribute)
+            target = AccelerateTarget(settings, stats, screen, *target_attribute)
         else:   # 否则创建匀速靶
-            target = UniformTarget(settings, screen, *target_attribute)
+            target = UniformTarget(settings, stats, screen, *target_attribute)
         if target.args[3]:  # target_attribute[3]为True，靶机带盾
             target.start_shield_timer()
         target.start_timer()

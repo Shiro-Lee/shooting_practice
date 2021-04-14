@@ -49,7 +49,7 @@ def run_game():
     failed_info = FailedInfo(screen, stats)
 
     # 创建输入框
-    pregame_info = PregameInfo(screen, stats)
+    pregame_info = PregameInfo(settings, screen, stats)
 
     # 开始游戏主循环
     while True:

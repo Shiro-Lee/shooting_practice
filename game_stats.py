@@ -24,6 +24,7 @@ class GameStats:
         self.bullet_left_score = 0  # 剩余弹药数得分
         self.time_used_score = 0    # 耗时得分
         self.total_score = 0    # 总计得分
+        self.sound_state = True
 
     def game_finish(self):
         """游戏完成，重置信息并计算得分"""

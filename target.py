@@ -12,18 +12,21 @@ class TargetSample:
 
     def __init__(self):
         # 加载靶机图像并获取其rect属性
-        self.image = pygame.image.load(dir_path + r'\images\target.png')
+        self.target_image = pygame.image.load(dir_path + r'\images\target.png')
+        self.target_shield_image = pygame.image.load(dir_path + r'\images\target_shield.png')
+        self.image = self.target_image
         self.rect = self.image.get_rect()
 
 
 class Target(TargetSample, Sprite):
     """靶机类"""
-    def __init__(self, settings, screen, *args):
+    def __init__(self, settings, stats, screen, *args):
         """初始化靶机并设置其起始位置"""
         TargetSample.__init__(self)
         Sprite.__init__(self)
         self.settings = settings
         self.screen = screen
+        self.stats = stats
         self.screen_rect = screen.get_rect()
         self.args = args
 
@@ -41,7 +44,7 @@ class Target(TargetSample, Sprite):
 
         self.delay = self.args[4]   # 靶机延时启动时长
         if self.args[3]:    # 带盾
-            self.image = pygame.image.load(dir_path + r'\images\target_shield.png')
+            self.image = self.target_shield_image
             self.life = 2
         else:   # 无盾
             self.life = 1
@@ -51,7 +54,7 @@ class Target(TargetSample, Sprite):
         if self.args[3] and self.shield_timer.pass_time > 5:    # 带盾靶机每5秒会重新生成护盾
             self.shield_timer.reset()
             if self.life < 2:   # 重新生成护盾，靶机变为蓝色
-                self.image = pygame.image.load(dir_path + r'\images\target_shield.png')
+                self.image = self.target_shield_image
                 self.life = 2
 
     def check_edges(self):
@@ -70,12 +73,14 @@ class Target(TargetSample, Sprite):
         """重写kill()，响应靶机被击中"""
         if self.timer.pass_time > 0.5:  # 0.5秒内的碰撞视为击中同一个靶机
             if self.life > 1:   # 击破护盾，靶机变为灰色
-                shield_broken_sound.play()
+                if self.stats.sound_state:
+                    shield_broken_sound.play()
                 self.life -= 1
-                self.image = pygame.image.load(dir_path + r'\images\target.png')
+                self.image = self.target_image
                 self.timer.reset()
             else:   # 击破靶机
-                target_broken_sound.play()
+                if self.stats.sound_state:
+                    target_broken_sound.play()
                 self.timer.stop()
                 self.shield_timer.stop()
                 super().kill()
@@ -101,8 +106,8 @@ class Target(TargetSample, Sprite):
 
 class UniformTarget(Target):
     """匀速靶"""
-    def __init__(self, settings, screen, *args):
-        super().__init__(settings, screen, *args)
+    def __init__(self, settings, stats, screen, *args):
+        super().__init__(settings, stats, screen, *args)
 
         # 速度、方向
         self.speed = self.args[2]
@@ -120,8 +125,8 @@ class UniformTarget(Target):
 
 class AccelerateTarget(Target):
     """变加速靶"""
-    def __init__(self, settings, screen, *args):
-        super().__init__(settings, screen, *args)
+    def __init__(self, settings, stats, screen, *args):
+        super().__init__(settings, stats, screen, *args)
         self.speed = 0
         self.a = self.args[2]   # 加速度
 

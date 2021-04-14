@@ -19,7 +19,7 @@ class Settings:
         # 子弹速度、发射上限设置
         self.bullet_speed = 10
         self.bullets_allowed = 1
-        # 弹药数
+        # 初始弹药数
         self.bullet_limit = 100
         # 轮数
         self.max_round = len(target_list)
