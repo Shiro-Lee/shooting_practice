@@ -6,7 +6,7 @@ class GameState(Enum):
     PREGAME = 0     # 游戏开始前
     RUNNING = 1     # 游戏进行中
     GAME_OVER = 2   # 游戏失败
-    GAME_FINISH = 3     # 游戏正常结束
+    GAME_FINISH = 3     # 游戏胜利
 
 
 class GameStats:

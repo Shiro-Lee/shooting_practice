@@ -83,6 +83,7 @@ def check_play_button(settings, screen, stats, targets, pregame_info, mouse_x, m
 
 
 def check_sound_button(pregame_info, mouse_x, mouse_y):
+    """检查声音按钮是否被按下"""
     button_clicked = pregame_info.sound_rect.collidepoint(mouse_x, mouse_y)
     if button_clicked:   # 开始按钮被点击且输入玩家昵称不为空时开始游戏
         pregame_info.switch_sound()

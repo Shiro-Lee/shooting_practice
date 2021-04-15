@@ -13,7 +13,6 @@ class TargetSample:
     def __init__(self):
         # 加载靶机图像并获取其rect属性
         self.target_image = pygame.image.load(dir_path + r'\images\target.png')
-        self.target_shield_image = pygame.image.load(dir_path + r'\images\target_shield.png')
         self.image = self.target_image
         self.rect = self.image.get_rect()
 
@@ -29,6 +28,7 @@ class Target(TargetSample, Sprite):
         self.stats = stats
         self.screen_rect = screen.get_rect()
         self.args = args
+        self.target_shield_image = pygame.image.load(dir_path + r'\images\target_shield.png')
 
         # 靶机初始位置
         self.rect.x = self.settings.x_target_position + args[0] * self.rect.width * 2
