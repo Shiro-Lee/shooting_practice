@@ -74,7 +74,7 @@ class Target(TargetSample, Sprite):
         if self.timer.pass_time > 0.5:  # 0.5秒内的碰撞视为击中同一个靶机
             if self.life > 1:   # 击破护盾，靶机变为灰色
                 if self.stats.sound_state:
-                    shield_broken_sound.play()
+                    shield_broken_sound.play()  # 击破护盾音效
                 self.life -= 1
                 self.image = self.target_image
                 self.timer.reset()
