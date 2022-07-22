@@ -25,7 +25,7 @@ class MyTimer:
         """设定时间"""
         seconds = int(self.pass_time)
         mseconds = (self.pass_time - seconds) * 100
-        self.time_str = '%d″%d' % (seconds, mseconds)
+        self.time_str = '%d:%d' % (seconds, mseconds)
 
     def update(self):
         """更新时间"""

@@ -259,7 +259,7 @@ class WinInfo:
         self.rank_title_image = self.win_font.render(self.rank_title, True, self.text_color)
         self.rank_title_rect = self.rank_title_image.get_rect()
         self.rank_title_rect.centerx = self.screen.get_rect().centerx
-        self.rank_title_rect.top = self.settings.y_target_boundary
+        self.rank_title_rect.top = self.settings.y_target_boundary + 5
 
     def show_info(self):
         """显示得分/排行榜"""
